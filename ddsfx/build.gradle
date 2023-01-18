@@ -6,7 +6,7 @@ dependencies {
     implementation project(':dds')
 }
 
-compileJava {
+tasks.withType(JavaCompile) {
     moduleOptions {
         addExports = [
                 'javafx.graphics/com.sun.javafx.iio'       : 'io.github.ititus.ddsfx',
@@ -15,10 +15,21 @@ compileJava {
     }
 }
 
-javadoc {
-    options {
-        addStringOption('-add-exports javafx.graphics/com.sun.javafx.iio=io.github.ititus.ddsfx', '-quiet')
-        addStringOption('-add-exports javafx.graphics/com.sun.javafx.iio.common=io.github.ititus.ddsfx', '-quiet')
+tasks.withType(Javadoc) {
+    moduleOptions {
+        addExports = [
+                'javafx.graphics/com.sun.javafx.iio'       : 'io.github.ititus.ddsfx',
+                'javafx.graphics/com.sun.javafx.iio.common': 'io.github.ititus.ddsfx'
+        ]
+    }
+}
+
+tasks.withType(Test) {
+    moduleOptions {
+        addExports = [
+                'javafx.graphics/com.sun.javafx.iio'       : 'io.github.ititus.ddsfx',
+                'javafx.graphics/com.sun.javafx.iio.common': 'io.github.ititus.ddsfx'
+        ]
     }
 }
 

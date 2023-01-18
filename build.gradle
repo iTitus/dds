@@ -1,7 +1,7 @@
 plugins {
     id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
     id 'org.openjfx.javafxplugin' version '0.0.13' apply false
-    // id 'org.javamodularity.moduleplugin' version '1.8.12' apply false
+    id 'org.javamodularity.moduleplugin' version '1.8.12' apply false
 }
 
 nexusPublishing {
@@ -22,7 +22,7 @@ subprojects {
     apply plugin: 'eclipse'
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
-    // apply plugin: 'org.javamodularity.moduleplugin'
+    apply plugin: 'org.javamodularity.moduleplugin'
 
     group = 'io.github.ititus'
     version = '1.0.0'
@@ -36,10 +36,10 @@ subprojects {
         withJavadocJar()
     }
 
-    /*modularity {
+    modularity {
         improveEclipseClasspathFile()
         // disableEffectiveArgumentsAdjustment()
-    }*/
+    }
 
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
@@ -57,6 +57,13 @@ subprojects {
 
     repositories {
         mavenCentral()
+    }
+
+    dependencies {
+        testImplementation platform('org.junit:junit-bom:5.9.2')
+        testImplementation 'org.junit.jupiter:junit-jupiter'
+        testImplementation 'org.assertj:assertj-core:3.24.2'
+        testImplementation 'org.mockito:mockito-core:5.0.0'
     }
 
     test {
