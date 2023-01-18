@@ -24,3 +24,7 @@ Read `dds` images (DirectDrawSurface), an image format made by Microsoft for Dir
 - adds dds support for JavaFX `Image`
 - one needs to call `io.github.ititus.ddsfx.DdsFx.init()` once to register the format
 - this requires JavaFX in the module path, but does not add a transitive dependency for it due to classifier problems (see https://github.com/openjfx/javafx-gradle-plugin/issues/65)
+
+When including this in a modular build you will need to add the following compile and run options:
+- `--add-export javafx.graphics/com.sun.javafx.iio=io.github.ititus.ddsfx`
+- `--add-export javafx.graphics/com.sun.javafx.iio.common=io.github.ititus.ddsfx`
