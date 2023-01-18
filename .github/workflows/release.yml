@@ -35,8 +35,8 @@ jobs:
         id: create_release
         uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ steps.get_version.outputs.version-without-v }}
+          tag: ${{ github.ref }}
+          name: ${{ steps.get_version.outputs.version-without-v }}
           body: |
             Download from [Maven Central](https://search.maven.org/artifact/io.github.ititus/dds/${{ steps.get_version.outputs.version-without-v }}/jar).
           draft: false
