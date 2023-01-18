@@ -1,0 +1,3 @@
+rootProject.name = 'dds'
+include('dds')
+include('ddsfx')

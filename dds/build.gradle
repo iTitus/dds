@@ -1,0 +1,43 @@
+dependencies {
+}
+
+publishing {
+    publications {
+        MyPublication(MavenPublication) {
+            pom {
+                name = 'DDS Reader'
+                packaging = 'jar'
+                description = 'DDS Image Library'
+                url = 'https://github.com/iTitus/dds'
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://mit-license.org'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'iTitus'
+                        name = 'iTitus'
+                        email = 'ititus@users.noreply.github.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/iTitus/dds.git'
+                    developerConnection = 'scm:git:ssh://git@github.com:iTitus/dds.git'
+                    url = 'https://github.com/iTitus/dds'
+                    tag = "v${version}"
+                }
+            }
+
+            from components.java
+        }
+    }
+}
+
+signing {
+    def signingKey = findProperty('signing_key')
+    def signingPassword = findProperty('signing_password')
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign publishing.publications.MyPublication
+}
