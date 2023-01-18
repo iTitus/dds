@@ -1,6 +1,3 @@
-dependencies {
-}
-
 publishing {
     publications {
         MyPublication(MavenPublication) {

@@ -1,10 +1,5 @@
 package io.github.ititus.dds;
 
-import javax.imageio.ImageTypeSpecifier;
-import java.awt.color.ColorSpace;
-import java.awt.image.ColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DirectColorModel;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +19,6 @@ public record DdsPixelformat(
 ) {
 
     public static final int SIZE = 32;
-    private static final int RGB_COLORSPACE = ColorSpace.CS_sRGB;
 
     public static DdsPixelformat load(DataReader r) throws IOException {
         return new DdsPixelformat(
@@ -153,101 +147,6 @@ public record DdsPixelformat(
         }
 
         return D3dFormat.UNKNOWN;
-    }
-
-    public ImageTypeSpecifier imageType() {
-        if ((dwFlags & DDS_RGBA) == DDS_RGBA) {
-            ColorModel cm = new DirectColorModel(
-                    ColorSpace.getInstance(RGB_COLORSPACE),
-                    dwRGBBitCount,
-                    dwRBitMask,
-                    dwGBitMask,
-                    dwBBitMask,
-                    dwABitMask,
-                    false,
-                    findBestTransferType()
-            );
-            return new ImageTypeSpecifier(
-                    cm,
-                    cm.createCompatibleSampleModel(1, 1)
-            );
-        } else if ((dwFlags & DDPF_RGB) == DDPF_RGB) {
-            ColorModel cm = new DirectColorModel(
-                    ColorSpace.getInstance(RGB_COLORSPACE),
-                    dwRGBBitCount,
-                    dwRBitMask,
-                    dwGBitMask,
-                    dwBBitMask,
-                    0,
-                    false,
-                    findBestTransferType()
-            );
-            return new ImageTypeSpecifier(
-                    cm,
-                    cm.createCompatibleSampleModel(1, 1)
-            );
-        } else if ((dwFlags & DdsConstants.DDPF_FOURCC) == DdsConstants.DDPF_FOURCC) {
-            if (dwFourCC == D3DFMT_DXT1) {
-                ColorModel cm = new DirectColorModel(
-                        ColorSpace.getInstance(RGB_COLORSPACE),
-                        17,
-                        0xf800,
-                        0x7e0,
-                        0x1f,
-                        0x10000,
-                        false,
-                        DataBuffer.TYPE_INT
-                );
-                return new ImageTypeSpecifier(
-                        cm,
-                        cm.createCompatibleSampleModel(1, 1)
-                );
-            } else if (dwFourCC == D3DFMT_DXT2 || dwFourCC == D3DFMT_DXT3) {
-                ColorModel cm = new DirectColorModel(
-                        ColorSpace.getInstance(RGB_COLORSPACE),
-                        20,
-                        0xf800,
-                        0x7e0,
-                        0x1f,
-                        0xf0000,
-                        dwFourCC == D3DFMT_DXT2,
-                        DataBuffer.TYPE_INT
-                );
-                return new ImageTypeSpecifier(
-                        cm,
-                        cm.createCompatibleSampleModel(1, 1)
-                );
-            } else if (dwFourCC == D3DFMT_DXT4 || dwFourCC == D3DFMT_DXT5) {
-                ColorModel cm = new DirectColorModel(
-                        ColorSpace.getInstance(RGB_COLORSPACE),
-                        24,
-                        0xf800,
-                        0x7e0,
-                        0x1f,
-                        0xff0000,
-                        dwFourCC == D3DFMT_DXT4,
-                        DataBuffer.TYPE_INT
-                );
-                return new ImageTypeSpecifier(
-                        cm,
-                        cm.createCompatibleSampleModel(1, 1)
-                );
-            }
-        }
-
-        throw new UnsupportedOperationException();
-    }
-
-    private int findBestTransferType() {
-        if (dwRGBBitCount <= 8) {
-            return DataBuffer.TYPE_BYTE;
-        } else if (dwRGBBitCount <= 16) {
-            return DataBuffer.TYPE_USHORT;
-        } else if (dwRGBBitCount <= 32) {
-            return DataBuffer.TYPE_INT;
-        }
-
-        return DataBuffer.TYPE_UNDEFINED;
     }
 
     @Override

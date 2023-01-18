@@ -1,10 +1,6 @@
-package io.github.ititus.dds.imageio;
+package io.github.ititus.ddsiio;
 
-import io.github.ititus.dds.D3dFormat;
-import io.github.ititus.dds.DdsFile;
-import io.github.ititus.dds.DdsResource;
-import io.github.ititus.dds.DdsSurface;
-import io.github.ititus.dds.internal.DdsHelper;
+import io.github.ititus.dds.*;
 
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
@@ -166,7 +162,7 @@ public class DdsImageReader extends ImageReader {
     @Override
     public Iterator<ImageTypeSpecifier> getImageTypes(int imageIndex) throws IOException {
         loadAndCheckIndex(imageIndex);
-        return List.of(dds.imageType()).iterator();
+        return List.of(DdsIioHelper.imageType(dds)).iterator();
     }
 
     @Override

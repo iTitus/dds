@@ -1,6 +1,4 @@
-package io.github.ititus.dds.internal;
-
-import io.github.ititus.dds.D3dFormat;
+package io.github.ititus.dds;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

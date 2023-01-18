@@ -1,4 +1,4 @@
-package io.github.ititus.dds.imageio;
+package io.github.ititus.ddsiio;
 
 import javax.imageio.ImageReader;
 import javax.imageio.spi.ImageReaderSpi;
@@ -17,7 +17,7 @@ public class DdsImageReaderSpi extends ImageReaderSpi {
                 "1.0.0",
                 new String[] {"dds", "DDS"},
                 new String[] {"dds"},
-                new String[] {"image/vnd-ms.dds"},
+                new String[] {"image/dds", "image/vnd-ms.dds"},
                 DdsImageReader.class.getName(),
                 new Class<?>[] {ImageInputStream.class},
                 null,

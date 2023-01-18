@@ -1,6 +1,5 @@
 package io.github.ititus.dds;
 
-import javax.imageio.ImageTypeSpecifier;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
@@ -148,14 +147,6 @@ public record DdsFile(
 
     public int resourceCount() {
         return header10 != null ? header10.resourceCount() : 1;
-    }
-
-    public ImageTypeSpecifier imageType() {
-        if (header10 != null) {
-            return header10.imageType();
-        }
-
-        return header.imageType();
     }
 
     @Override

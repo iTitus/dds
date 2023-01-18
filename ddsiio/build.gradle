@@ -1,50 +1,14 @@
-plugins {
-    id 'org.openjfx.javafxplugin'
-}
-
 dependencies {
-    api project(':ddsiio')
-}
-
-tasks.withType(JavaCompile) {
-    moduleOptions {
-        addExports = [
-                'javafx.graphics/com.sun.javafx.iio'       : 'io.github.ititus.ddsfx',
-                'javafx.graphics/com.sun.javafx.iio.common': 'io.github.ititus.ddsfx'
-        ]
-    }
-}
-
-tasks.withType(Javadoc) {
-    moduleOptions {
-        addExports = [
-                'javafx.graphics/com.sun.javafx.iio'       : 'io.github.ititus.ddsfx',
-                'javafx.graphics/com.sun.javafx.iio.common': 'io.github.ititus.ddsfx'
-        ]
-    }
-}
-
-tasks.withType(Test) {
-    moduleOptions {
-        addExports = [
-                'javafx.graphics/com.sun.javafx.iio'       : 'io.github.ititus.ddsfx',
-                'javafx.graphics/com.sun.javafx.iio.common': 'io.github.ititus.ddsfx'
-        ]
-    }
-}
-
-javafx {
-    version = '19'
-    modules = ['javafx.graphics']
+    api project(':dds')
 }
 
 publishing {
     publications {
         MyPublication(MavenPublication) {
             pom {
-                name = 'DDS FX Reader'
+                name = 'DDS IIO Reader'
                 packaging = 'jar'
-                description = 'DDS Image Library for JavaFX'
+                description = 'DDS Image Library for ImageIO'
                 url = 'https://github.com/iTitus/dds'
                 licenses {
                     license {

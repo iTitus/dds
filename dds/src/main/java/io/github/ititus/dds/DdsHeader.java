@@ -1,6 +1,5 @@
 package io.github.ititus.dds;
 
-import javax.imageio.ImageTypeSpecifier;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -128,10 +127,6 @@ public record DdsHeader(
 
     public D3dFormat d3dFormat() {
         return ddspf.d3dFormat();
-    }
-
-    public ImageTypeSpecifier imageType() {
-        return ddspf.imageType();
     }
 
     public int calculateCubemapFaces() {
