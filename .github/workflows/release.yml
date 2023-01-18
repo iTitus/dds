@@ -39,6 +39,7 @@ jobs:
           name: ${{ steps.get_version.outputs.version-without-v }}
           body: |
             Download from [Maven Central](https://search.maven.org/artifact/io.github.ititus/dds/${{ steps.get_version.outputs.version-without-v }}/jar).
+          generateReleaseNotes: true
           draft: false
           prerelease: false
 
