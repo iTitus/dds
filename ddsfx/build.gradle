@@ -65,6 +65,16 @@ publishing {
                     url = 'https://github.com/iTitus/dds'
                     tag = "v${version}"
                 }
+
+                // Remove classifier for JavaFX dependencies
+                withXml {
+                    Node pomNode = asNode()
+                    pomNode.dependencies.'*'.findAll() {
+                        it.groupId.text() == 'org.openjfx'
+                    }.each {
+                        it.parent().remove(it)
+                    }
+                }
             }
 
             from components.java
