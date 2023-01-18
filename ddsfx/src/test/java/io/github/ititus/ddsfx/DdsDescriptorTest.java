@@ -7,7 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DdsDescriptorTest {
 
     @Test
-    void testMissingMagic() {
+    void testFormatName() {
         assertThat(DdsDescriptor.getInstance().getFormatName()).isEqualTo("DDS");
     }
 }
