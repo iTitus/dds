@@ -22,10 +22,6 @@ javafx {
     configuration = 'compileOnlyAndTest'
 }
 
-tasks.withType(GenerateModuleMetadata) {
-    enabled = false
-}
-
 tasks.withType(JavaCompile) {
     moduleOptions {
         addExports = [
@@ -80,16 +76,6 @@ publishing {
                     url = 'https://github.com/iTitus/dds'
                     tag = "v${version}"
                 }
-
-                // Remove classifier for JavaFX dependencies
-                /*withXml {
-                    Node pomNode = asNode()
-                    pomNode.dependencies.'*'.findAll() {
-                        it.groupId.text() == 'org.openjfx'
-                    }.each {
-                        it.remove(it.classifier)
-                    }
-                }*/
             }
 
             from components.java
