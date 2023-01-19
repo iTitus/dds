@@ -1,4 +1,4 @@
-package io.github.ititus.ddsfx;
+package io.github.ititus.ddsfx.internal;
 
 import com.sun.javafx.iio.ImageFormatDescription;
 import com.sun.javafx.iio.common.ImageDescriptor;

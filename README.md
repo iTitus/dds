@@ -9,7 +9,13 @@
 
 Read `dds` images (DirectDrawSurface), an image format made by Microsoft for DirectX.
 
-- Targets: Java `BufferedImage` (`dds` module) and JavaFX `Image` (`ddsfx` module)
+Targets:
+
+- `DdsFile` (`dds` module)
+- Java `BufferedImage` (`ddsiio` module)
+- JavaFX `Image` (`ddsfx` module)
+
+Currently targeting Java 17+ and JavaFX 19+.
 
 ## dds
 
@@ -23,9 +29,10 @@ Read `dds` images (DirectDrawSurface), an image format made by Microsoft for Dir
 ## ddsfx
 
 - adds dds support for JavaFX `Image`
-- one needs to call `io.github.ititus.ddsfx.DdsFx.init()` once to register the format
-- this requires the `java.desktop` module (via ddsiio) and JavaFX
+- one needs to call `io.github.ititus.ddsfx.DdsFx.setup()` once to register the format
+- this requires the `java.desktop` module (via `ddsiio`) and JavaFX
+- JavaFX needs to be included separately, there is no transitive depenedncy
 - if you have problems with duplicate JavaFX dependencies see https://github.com/openjfx/javafx-gradle-plugin/issues/65
 - when including this in a modular build you will need to add the following compile and run options:
-  - `--add-export javafx.graphics/com.sun.javafx.iio=io.github.ititus.ddsfx`
-  - `--add-export javafx.graphics/com.sun.javafx.iio.common=io.github.ititus.ddsfx`
+    - `--add-export javafx.graphics/com.sun.javafx.iio=io.github.ititus.ddsfx`
+    - `--add-export javafx.graphics/com.sun.javafx.iio.common=io.github.ititus.ddsfx`

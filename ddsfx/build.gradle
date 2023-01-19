@@ -1,9 +1,25 @@
-def fxPlatform = osdetector.os == 'osx' ? osdetector.arch == 'aarch_64' ? 'mac-aarch64' : 'mac' : osdetector.os == 'windows' ? 'win' : osdetector.os == 'linux' ? osdetector.arch == 'aarch_64' ? 'linux-aarch64' : 'linux' : osdetector.os
+plugins {
+    id 'org.openjfx.javafxplugin'
+}
+
+configurations {
+    compileOnlyAndTest
+    compileOnly {
+        extendsFrom compileOnlyAndTest
+    }
+    testImplementation {
+        extendsFrom compileOnlyAndTest
+    }
+}
 
 dependencies {
     api project(':ddsiio')
-    api "org.openjfx:javafx-base:19:${fxPlatform}"
-    api "org.openjfx:javafx-graphics:19:${fxPlatform}"
+}
+
+javafx {
+    version = '19'
+    modules = ['javafx.graphics']
+    configuration = 'compileOnlyAndTest'
 }
 
 tasks.withType(GenerateModuleMetadata) {
@@ -66,14 +82,14 @@ publishing {
                 }
 
                 // Remove classifier for JavaFX dependencies
-                withXml {
+                /*withXml {
                     Node pomNode = asNode()
                     pomNode.dependencies.'*'.findAll() {
                         it.groupId.text() == 'org.openjfx'
                     }.each {
                         it.remove(it.classifier)
                     }
-                }
+                }*/
             }
 
             from components.java

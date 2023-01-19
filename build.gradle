@@ -1,6 +1,6 @@
 plugins {
-    id 'com.google.osdetector' version '1.7.1'
     id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
+    id 'org.openjfx.javafxplugin' version '0.0.13' apply false
     id 'org.javamodularity.moduleplugin' version '1.8.12' apply false
 }
 
@@ -25,7 +25,7 @@ subprojects {
     apply plugin: 'org.javamodularity.moduleplugin'
 
     group = 'io.github.ititus'
-    version = '2.0.2'
+    version = '2.0.3'
 
     java {
         toolchain {

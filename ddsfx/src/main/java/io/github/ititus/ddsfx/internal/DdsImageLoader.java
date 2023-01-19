@@ -1,4 +1,4 @@
-package io.github.ititus.ddsfx;
+package io.github.ititus.ddsfx.internal;
 
 import com.sun.javafx.iio.ImageFrame;
 import com.sun.javafx.iio.ImageMetadata;

@@ -1,4 +1,4 @@
-package io.github.ititus.ddsfx;
+package io.github.ititus.ddsfx.internal;
 
 import org.junit.jupiter.api.Test;
 
