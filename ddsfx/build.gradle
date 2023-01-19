@@ -1,9 +1,13 @@
-plugins {
-    id 'org.openjfx.javafxplugin'
-}
+def fxPlatform = osdetector.os == 'osx' ? osdetector.arch == 'aarch_64' ? 'mac-aarch64' : 'mac' : osdetector.os == 'windows' ? 'win' : osdetector.os == 'linux' ? osdetector.arch == 'aarch_64' ? 'linux-aarch64' : 'linux' : osdetector.os
 
 dependencies {
     api project(':ddsiio')
+    api "org.openjfx:javafx-base:19:${fxPlatform}"
+    api "org.openjfx:javafx-graphics:19:${fxPlatform}"
+}
+
+tasks.withType(GenerateModuleMetadata) {
+    enabled = false
 }
 
 tasks.withType(JavaCompile) {
@@ -31,11 +35,6 @@ tasks.withType(Test) {
                 'javafx.graphics/com.sun.javafx.iio.common': 'io.github.ititus.ddsfx'
         ]
     }
-}
-
-javafx {
-    version = '19'
-    modules = ['javafx.graphics']
 }
 
 publishing {
@@ -72,7 +71,7 @@ publishing {
                     pomNode.dependencies.'*'.findAll() {
                         it.groupId.text() == 'org.openjfx'
                     }.each {
-                        it.parent().remove(it)
+                        it.remove(it.classifier)
                     }
                 }
             }
