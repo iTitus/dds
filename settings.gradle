@@ -2,3 +2,4 @@ rootProject.name = 'dds'
 include('dds')
 include('ddsiio')
 include('ddsfx')
+include('example')
