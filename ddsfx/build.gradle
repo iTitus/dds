@@ -17,7 +17,7 @@ dependencies {
 }
 
 javafx {
-    version = '19'
+    version = '20'
     modules = ['javafx.graphics']
     configuration = 'compileOnlyAndTest'
 }
