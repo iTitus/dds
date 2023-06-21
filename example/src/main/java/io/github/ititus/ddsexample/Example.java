@@ -1,5 +1,7 @@
 package io.github.ititus.ddsexample;
 
+import io.github.ititus.dds.DdsFile;
+
 import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,7 +16,9 @@ public final class Example {
     public static void main(String[] args) throws Exception {
         Path desktop = Path.of(System.getProperty("user.home"), "Desktop").toRealPath();
 
-        convertTo(desktop.resolve("ce_eagle_doubleheaded_base.dds"), "png");
+        var file = desktop.resolve("ce_frame_circle.dds");
+        showInfo(file);
+        convertTo(file, "png");
     }
 
     private static void convertTo(Path in, String formatName) throws IOException {
@@ -40,9 +44,13 @@ public final class Example {
             nameWithoutExtension = name;
         }
 
-        Path out = in.resolveSibling(nameWithoutExtension + '.' + fileExtension).toRealPath();
-        if (Files.isSameFile(in, out)) {
-            throw new IllegalArgumentException("generated output format gives same file path");
+        Path out = in.resolveSibling(nameWithoutExtension + '.' + fileExtension).toAbsolutePath().normalize();
+        if (Files.exists(out)) {
+            if (!Files.isRegularFile(out)) {
+                throw new IllegalArgumentException("generated output path already exists and is a directory");
+            } else if (Files.isSameFile(in, out)) {
+                throw new IllegalArgumentException("generated output path gives same file path as input");
+            }
         }
 
         convertTo(in, out, formatName);
@@ -52,9 +60,15 @@ public final class Example {
         try (var is = Files.newInputStream(in, StandardOpenOption.READ)) {
             var img = ImageIO.read(is);
             Files.createDirectories(out.getParent());
-            try (var os = Files.newOutputStream(out, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+            try (var os = Files.newOutputStream(out, StandardOpenOption.WRITE, StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING)) {
                 ImageIO.write(img, formatName, os);
             }
         }
+    }
+
+    private static void showInfo(Path in) throws Exception {
+        var dds = DdsFile.load(in);
+        System.out.println(dds);
     }
 }
