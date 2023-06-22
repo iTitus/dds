@@ -3,7 +3,7 @@ package io.github.ititus.dds;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public class DdsSurface {
+public final class DdsSurface {
 
     private final ByteBuffer buffer;
 

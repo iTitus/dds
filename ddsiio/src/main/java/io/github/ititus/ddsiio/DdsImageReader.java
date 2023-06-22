@@ -29,8 +29,8 @@ public class DdsImageReader extends ImageReader {
         short rawC1 = b.getShort();
         b.get(colorIndices, 0, 4);
 
-        Rgba c0 = Rgba.from565(rawC0);
-        Rgba c1 = Rgba.from565(rawC1);
+        Rgba c0 = Rgba.fromR5G6B5(rawC0);
+        Rgba c1 = Rgba.fromR5G6B5(rawC1);
         colors[0] = c0;
         colors[1] = c1;
         if (!oneBitAlpha || Short.compareUnsigned(rawC0, rawC1) > 0) {
@@ -88,7 +88,7 @@ public class DdsImageReader extends ImageReader {
                 for (int y_ = 0; y_ < yMax; y_++) {
                     for (int x_ = 0; x_ < xMax; x_++) {
                         Rgba color = colorLookupBc1(colors, colorIndices, y_, x_);
-                        raster.setDataElements(x + x_, y + y_, new int[] { color.asARGB() });
+                        raster.setDataElements(x + x_, y + y_, new int[] { color.asA8R8G8B8() });
                     }
                 }
             }
@@ -111,7 +111,7 @@ public class DdsImageReader extends ImageReader {
                         int a = (alphas[(y_ << 1) | (x_ >>> 1)] >>> (4 * (x_ & 0x1))) & 0xf;
                         Rgba color = colorLookupBc1(colors, colorIndices, y_, x_)
                                 .withAlpha(a / 15.0f);
-                        raster.setDataElements(x + x_, y + y_, new int[] { color.asARGB() });
+                        raster.setDataElements(x + x_, y + y_, new int[] { color.asA8R8G8B8() });
                     }
                 }
             }
@@ -134,7 +134,7 @@ public class DdsImageReader extends ImageReader {
                     for (int x_ = 0; x_ < xMax; x_++) {
                         Rgba color = colorLookupBc1(colors, colorIndices, y_, x_).withAlpha(alphaLookupBc3(alphas,
                                 alphaIndices, y_, x_));
-                        raster.setDataElements(x + x_, y + y_, new int[] { color.asARGB() });
+                        raster.setDataElements(x + x_, y + y_, new int[] { color.asA8R8G8B8() });
                     }
                 }
             }
@@ -144,7 +144,7 @@ public class DdsImageReader extends ImageReader {
     @Override
     public int getNumImages(boolean allowSearch) throws IOException {
         if (seekForwardOnly && allowSearch) {
-            throw new IllegalStateException("seekForwardOnly and allowSearch can't both be true!");
+            throw new IllegalStateException("seekForwardOnly and allowSearch cannot both be true!");
         }
 
         load();

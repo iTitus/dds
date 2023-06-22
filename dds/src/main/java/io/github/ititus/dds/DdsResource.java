@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DdsResource {
+public final class DdsResource {
 
     private final List<DdsSurface> surfaces;
 
