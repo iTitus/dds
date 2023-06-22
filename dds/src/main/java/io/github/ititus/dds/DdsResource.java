@@ -13,31 +13,31 @@ public class DdsResource {
     }
 
     public static DdsResource load(DataReader r, DdsHeader header, DdsHeaderDxt10 header10) throws IOException {
-        if (header10 != null) {
-            throw new UnsupportedOperationException("unsupported format");
-        }
-
         List<DdsSurface> surfaces = new ArrayList<>();
+        if (header10 != null) {
+            // TODO: support dxgi format as well
+            throw new UnsupportedOperationException("dxt10 header not supported");
+        } else {
+            D3dFormat d3dFormat = header.d3dFormat();
 
-        D3dFormat d3dFormat = header.d3dFormat();
+            int mipMapCount = header.hasMipmaps() ? DdsHelper.maxUnsigned(1, header.dwMipMapCount()) : 1;
+            int depth = header.isVolumeTexture() ? DdsHelper.maxUnsigned(1, header.dwDepth()) : 1;
+            int faces = header.isCubemap() ? DdsHelper.maxUnsigned(1, header.calculateCubemapFaces()) : 1;
 
-        int mipMapCount = header.hasMipmaps() ? Math.max(1, header.dwMipMapCount()) : 1;
-        int depth = header.isVolumeTexture() ? Math.max(1, header.dwDepth()) : 1;
-        int faces = header.isCubemap() ? Math.max(1, header.calculateCubemapFaces()) : 1;
+            for (int face = 0; Integer.compareUnsigned(face, faces) < 0; face++) {
+                int height = header.dwHeight();
+                int width = header.dwWidth();
+                for (int mipmap = 0; Integer.compareUnsigned(mipmap, mipMapCount) < 0; mipmap++) {
+                    int size = DdsHelper.calculateSurfaceSize(height, width, d3dFormat) * depth;
+                    surfaces.add(DdsSurface.load(r, size));
 
-        for (int face = 0; face < faces; face++) {
-            int height = header.dwHeight();
-            int width = header.dwWidth();
-            for (int mipmap = 0; mipmap < mipMapCount; mipmap++) {
-                int size = DdsHelper.calculateSurfaceSize(height, width, d3dFormat) * depth;
-                surfaces.add(DdsSurface.load(r, size));
+                    if (height == 1 && width == 1) {
+                        break;
+                    }
 
-                if (height == 1 && width == 1) {
-                    break;
+                    height = Math.max(1, height / 2);
+                    width = Math.max(1, width / 2);
                 }
-
-                height = Math.max(1, height / 2);
-                width = Math.max(1, width / 2);
             }
         }
 

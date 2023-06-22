@@ -41,18 +41,11 @@ public final class DdsHelper {
         return Byte.toUnsignedInt(bytes[0]) | (Byte.toUnsignedInt(bytes[1]) << 8) | (Byte.toUnsignedInt(bytes[2]) << 16);
     }
 
-    public static byte ip_u8(byte a, byte b, int n1, int n2) {
-        return (byte) ((n1 * Byte.toUnsignedInt(a) + n2 * Byte.toUnsignedInt(b)) / (n1 + n2));
-    }
-
-    private static int ip_u16(int a, int b, int n1, int n2) {
-        return (n1 * a + n2 * b) / (n1 + n2);
-    }
-
-    public static short ip_565(short c0, short c1, int n1, int n2) {
-        int r = ip_u16(c0 & 0xf800, c1 & 0xf800, n1, n2) & 0xf800;
-        int g = ip_u16(c0 & 0x7e0, c1 & 0x7e0, n1, n2) & 0x7e0;
-        int b = ip_u16(c0 & 0x1f, c1 & 0x1f, n1, n2) & 0x1f;
-        return (short) (r | g | b);
+    public static int maxUnsigned(int a, int b) {
+        if (Integer.compareUnsigned(a, b) < 0) {
+            return b;
+        } else {
+            return a;
+        }
     }
 }

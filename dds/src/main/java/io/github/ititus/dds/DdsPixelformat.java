@@ -38,7 +38,11 @@ public record DdsPixelformat(
     }
 
     public boolean isValid(boolean strict) {
-        return dwSize == SIZE;
+        if (dwSize != SIZE) {
+            return false;
+        } else {
+            return d3dFormat().getBitsPerPixel() != 0;
+        }
     }
 
     public D3dFormat d3dFormat() {

@@ -85,13 +85,16 @@ public record DdsFile(
         DdsHeaderDxt10 header10;
         if (header.shouldLoadHeader10()) {
             header10 = DdsHeaderDxt10.load(r);
+            if (!header10.isValid(header)) {
+                throw new IOException("invalid dds dxt10 header");
+            }
         } else {
             header10 = null;
         }
 
         int resourceCount = header10 != null ? header10.resourceCount() : 1;
         DdsResource[] resources = new DdsResource[resourceCount];
-        for (int i = 0; i < resourceCount; i++) {
+        for (int i = 0; Integer.compareUnsigned(i, resourceCount) < 0; i++) {
             resources[i] = DdsResource.load(r, header, header10);
         }
 
@@ -133,7 +136,7 @@ public record DdsFile(
         return header.isVolumeTexture();
     }
 
-    public boolean isDx10() {
+    public boolean isDxt10() {
         return header10 != null;
     }
 

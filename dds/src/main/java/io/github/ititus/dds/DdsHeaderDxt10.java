@@ -23,7 +23,36 @@ public record DdsHeaderDxt10(
     }
 
     public int resourceCount() {
-        return arraySize > 0 ? arraySize : 1;
+        return arraySize != 0 ? arraySize : 1;
+    }
+
+    public boolean isValid(DdsHeader header) {
+        if (arraySize == 0) {
+            return false;
+        } else if (dxgiFormat.getBitsPerPixel() == 0) {
+            return false;
+        }
+
+        switch (resourceDimension) {
+            case D3D10_RESOURCE_DIMENSION_TEXTURE1D -> {
+                if ((header.dwFlags() & DdsConstants.DDSD_HEIGHT) != 0 && header.dwHeight() != 1) {
+                    return false;
+                }
+            }
+            case D3D10_RESOURCE_DIMENSION_TEXTURE2D -> {}
+            case D3D10_RESOURCE_DIMENSION_TEXTURE3D -> {
+                if ((header.dwFlags() & DdsConstants.DDS_HEADER_FLAGS_VOLUME) == 0) {
+                    return false;
+                } else if (Integer.compareUnsigned(arraySize, 1) > 0) {
+                    return false;
+                }
+            }
+            default -> {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     @Override

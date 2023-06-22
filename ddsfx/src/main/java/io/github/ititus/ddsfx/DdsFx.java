@@ -19,7 +19,8 @@ public final class DdsFx {
 
                 Class<?> imageStorage = Class.forName("com.sun.javafx.iio.ImageStorage");
                 Class<?> imageLoaderFactory = Class.forName("com.sun.javafx.iio.ImageLoaderFactory");
-                Method addImageLoaderFactory = imageStorage.getDeclaredMethod("addImageLoaderFactory", imageLoaderFactory);
+                Method addImageLoaderFactory = imageStorage.getDeclaredMethod("addImageLoaderFactory",
+                        imageLoaderFactory);
 
                 var imageStorageGetInstance = imageStorage.getDeclaredMethod("getInstance");
                 imageStorageGetInstance.setAccessible(true);
@@ -27,7 +28,8 @@ public final class DdsFx {
 
                 addImageLoaderFactory.invoke(imageStorageInstance, ddsImageLoaderFactoryInstance);
             } catch (Exception e) {
-                throw new RuntimeException("could not call ImageStorage#addImageLoaderFactory method, it is required to register the dds image loader", e);
+                throw new RuntimeException("could not call ImageStorage#addImageLoaderFactory method, it is required " +
+                        "to register the dds image loader", e);
             }
             initialized = true;
         }

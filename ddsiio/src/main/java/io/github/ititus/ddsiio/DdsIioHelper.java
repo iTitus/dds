@@ -17,18 +17,15 @@ public final class DdsIioHelper {
     private DdsIioHelper() {}
 
     public static ImageTypeSpecifier imageType(DdsFile file) {
-        if (file.isDx10()) {
-            return imageType(file.header10());
+        if (file.isDxt10()) {
+            return imageType(file.header(), file.header10());
         }
 
         return imageType(file.header());
     }
 
     public static ImageTypeSpecifier imageType(DdsHeader header) {
-        return imageType(header.ddspf());
-    }
-
-    public static ImageTypeSpecifier imageType(DdsPixelformat pixelformat) {
+        DdsPixelformat pixelformat = header.ddspf();
         if ((pixelformat.dwFlags() & DDS_RGBA) == DDS_RGBA) {
             ColorModel cm = new DirectColorModel(
                     ColorSpace.getInstance(RGB_COLORSPACE),
@@ -108,19 +105,28 @@ public final class DdsIioHelper {
             }
         }
 
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("unsupported format: " + header);
     }
 
-    public static ImageTypeSpecifier imageType(DdsHeaderDxt10 header10) {
-        throw new UnsupportedOperationException("cannot get ImageTypeSpecifier from DX10 header");
+    public static ImageTypeSpecifier imageType(DdsHeader header, DdsHeaderDxt10 header10) {
+        // TODO: support dxgi format as well
+        throw new UnsupportedOperationException("unsupported format: " + header + " " + header10);
     }
 
     public static int findBestTransferType(DdsPixelformat pixelformat) {
-        if (pixelformat.dwRGBBitCount() <= 8) {
+        return findBestTransferType(pixelformat.d3dFormat().getBitsPerPixel());
+    }
+
+    public static int findBestTransferType(DdsHeaderDxt10 header) {
+        return findBestTransferType(header.dxgiFormat().getBitsPerPixel());
+    }
+
+    public static int findBestTransferType(int bpp) {
+        if (bpp <= 8) {
             return DataBuffer.TYPE_BYTE;
-        } else if (pixelformat.dwRGBBitCount() <= 16) {
+        } else if (bpp <= 16) {
             return DataBuffer.TYPE_USHORT;
-        } else if (pixelformat.dwRGBBitCount() <= 32) {
+        } else if (bpp <= 32) {
             return DataBuffer.TYPE_INT;
         }
 

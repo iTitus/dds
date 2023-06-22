@@ -44,4 +44,12 @@ public enum D3d10ResourceDimension {
     public int value() {
         return value;
     }
+
+    public boolean isTexture() {
+        return switch (this) {
+            case D3D10_RESOURCE_DIMENSION_TEXTURE1D, D3D10_RESOURCE_DIMENSION_TEXTURE2D,
+                    D3D10_RESOURCE_DIMENSION_TEXTURE3D -> true;
+            default -> false;
+        };
+    }
 }

@@ -184,43 +184,41 @@ public class DdsImageReader extends ImageReader {
     public BufferedImage read(int imageIndex, ImageReadParam param) throws IOException {
         loadAndCheckIndex(imageIndex);
 
-        if (dds.header10() != null) {
-            throw new UnsupportedOperationException("dx10 header not supported");
-        }
-
-        D3dFormat d3dFormat = dds.d3dFormat();
         DdsResource resource = dds.resources().get(imageIndex);
-        DdsSurface surface = resource.getSurfaces().get(0);
-
-        int bpp = d3dFormat.getBitsPerPixel();
-
-        int h = getHeight(imageIndex);
-        int w = getWidth(imageIndex);
-
-        BufferedImage img = getDestination(param, getImageTypes(imageIndex), w, h);
-        WritableRaster raster = img.getRaster();
-
+        DdsSurface surface = resource.getSurfaces().get(0); // TODO: make this addressable
         ByteBuffer b = surface.getBuffer();
         b.order(ByteOrder.LITTLE_ENDIAN);
 
-        if (d3dFormat.isBlockCompressed()) {
-            switch (d3dFormat) {
-                case DXT1 -> bc1(h, w, raster, b);
-                case DXT2, DXT3 -> bc2(h, w, raster, b);
-                case DXT4, DXT5 -> bc3(h, w, raster, b);
-                default -> throw new RuntimeException("illegal block compression");
-            }
+        int h = getHeight(imageIndex);
+        int w = getWidth(imageIndex);
+        BufferedImage img = getDestination(param, getImageTypes(imageIndex), w, h);
+        WritableRaster raster = img.getRaster();
+
+        if (dds.isDxt10()) {
+            // TODO: support dxgi format as well
+            throw new UnsupportedOperationException("dxt10 header not supported");
         } else {
-            for (int y = 0; y < h; y++) {
-                for (int x = 0; x < w; x++) {
-                    Object arr = switch (bpp) {
-                        case 8 -> new byte[] { b.get() };
-                        case 16 -> new short[] { b.getShort() };
-                        case 24 -> new int[] { DdsHelper.read24(b) };
-                        case 32 -> new int[] { b.getInt() };
-                        default -> throw new RuntimeException("illegal bpp");
-                    };
-                    raster.setDataElements(x, y, arr);
+            D3dFormat d3dFormat = dds.d3dFormat();
+            if (d3dFormat.isBlockCompressed()) {
+                switch (d3dFormat) {
+                    case DXT1 -> bc1(h, w, raster, b);
+                    case DXT2, DXT3 -> bc2(h, w, raster, b);
+                    case DXT4, DXT5 -> bc3(h, w, raster, b);
+                    default -> throw new RuntimeException("unsupported block compression: " + d3dFormat);
+                }
+            } else {
+                int bpp = d3dFormat.getBitsPerPixel();
+                for (int y = 0; y < h; y++) {
+                    for (int x = 0; x < w; x++) {
+                        Object arr = switch (bpp) {
+                            case 8 -> new byte[] { b.get() };
+                            case 16 -> new short[] { b.getShort() };
+                            case 24 -> new int[] { DdsHelper.read24(b) };
+                            case 32 -> new int[] { b.getInt() };
+                            default -> throw new RuntimeException("unsupported bpp: " + bpp); // TODO: support other bpp
+                        };
+                        raster.setDataElements(x, y, arr);
+                    }
                 }
             }
         }

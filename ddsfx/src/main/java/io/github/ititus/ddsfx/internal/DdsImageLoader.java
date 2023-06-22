@@ -44,7 +44,8 @@ public class DdsImageLoader extends ImageLoaderImpl {
 
         boolean hasAlpha = cm.hasAlpha();
         int bpp = hasAlpha ? 4 : 3;
-        ImageStorage.ImageType type = hasAlpha ? (img.isAlphaPremultiplied() ? ImageStorage.ImageType.RGBA_PRE : ImageStorage.ImageType.RGBA) : ImageStorage.ImageType.RGB;
+        ImageStorage.ImageType type = hasAlpha ? (img.isAlphaPremultiplied() ? ImageStorage.ImageType.RGBA_PRE :
+                ImageStorage.ImageType.RGBA) : ImageStorage.ImageType.RGB;
 
         ByteBuffer data = ByteBuffer.allocate(w * h * bpp);
         WritableRaster raster = img.getRaster();
@@ -61,8 +62,8 @@ public class DdsImageLoader extends ImageLoaderImpl {
         }
         data.flip();
 
-        ImageMetadata metadata = new ImageMetadata(null, null, null, null, null, null, null, width, height, null, null, null);
-
+        ImageMetadata metadata = new ImageMetadata(null, null, null, null, null, null, null, width, height, null,
+                null, null);
         ImageFrame frame = new ImageFrame(type, data, w, h, w * bpp, null, metadata);
         if (width != w || height != h) {
             frame = ImageTools.scaleImageFrame(frame, width, height, smooth);
