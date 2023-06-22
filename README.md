@@ -31,7 +31,7 @@ Currently targeting Java 17+ and JavaFX 19+.
 - adds dds support for JavaFX `Image`
 - one needs to call `io.github.ititus.ddsfx.DdsFx.setup()` once to register the format
 - this requires the `java.desktop` module (via `ddsiio`) and JavaFX
-- JavaFX needs to be included separately, there is no transitive depenedncy
+- JavaFX needs to be included separately, there is no transitive dependency
 - if you have problems with duplicate JavaFX dependencies see https://github.com/openjfx/javafx-gradle-plugin/issues/65
 - when including this in a modular build you will need to add the following compile and run options:
     - `--add-export javafx.graphics/com.sun.javafx.iio=io.github.ititus.ddsfx`
