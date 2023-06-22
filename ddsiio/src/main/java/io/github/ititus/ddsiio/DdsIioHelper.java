@@ -12,9 +12,9 @@ import static io.github.ititus.dds.DdsConstants.*;
 
 public final class DdsIioHelper {
 
-    private DdsIioHelper() {}
-
     public static final int RGB_COLORSPACE = ColorSpace.CS_sRGB;
+
+    private DdsIioHelper() {}
 
     public static ImageTypeSpecifier imageType(DdsFile file) {
         if (file.isDx10()) {
@@ -63,11 +63,11 @@ public final class DdsIioHelper {
             if (pixelformat.dwFourCC() == D3DFMT_DXT1) {
                 ColorModel cm = new DirectColorModel(
                         ColorSpace.getInstance(RGB_COLORSPACE),
-                        17,
-                        0xf800,
-                        0x7e0,
-                        0x1f,
-                        0x10000,
+                        32,
+                        0x00ff0000,
+                        0x0000ff00,
+                        0x000000ff,
+                        0xff000000,
                         false,
                         DataBuffer.TYPE_INT
                 );
@@ -78,11 +78,11 @@ public final class DdsIioHelper {
             } else if (pixelformat.dwFourCC() == D3DFMT_DXT2 || pixelformat.dwFourCC() == D3DFMT_DXT3) {
                 ColorModel cm = new DirectColorModel(
                         ColorSpace.getInstance(RGB_COLORSPACE),
-                        20,
-                        0xf800,
-                        0x7e0,
-                        0x1f,
-                        0xf0000,
+                        32,
+                        0x00ff0000,
+                        0x0000ff00,
+                        0x000000ff,
+                        0xff000000,
                         pixelformat.dwFourCC() == D3DFMT_DXT2,
                         DataBuffer.TYPE_INT
                 );
@@ -93,11 +93,11 @@ public final class DdsIioHelper {
             } else if (pixelformat.dwFourCC() == D3DFMT_DXT4 || pixelformat.dwFourCC() == D3DFMT_DXT5) {
                 ColorModel cm = new DirectColorModel(
                         ColorSpace.getInstance(RGB_COLORSPACE),
-                        24,
-                        0xf800,
-                        0x7e0,
-                        0x1f,
-                        0xff0000,
+                        32,
+                        0x00ff0000,
+                        0x0000ff00,
+                        0x000000ff,
+                        0xff000000,
                         pixelformat.dwFourCC() == D3DFMT_DXT4,
                         DataBuffer.TYPE_INT
                 );

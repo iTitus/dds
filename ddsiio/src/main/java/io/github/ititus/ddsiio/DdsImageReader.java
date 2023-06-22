@@ -24,31 +24,71 @@ public class DdsImageReader extends ImageReader {
         super(originator);
     }
 
+    private static void loadColorsBc1(ByteBuffer b, Rgba[] colors, byte[] colorIndices, boolean oneBitAlpha) {
+        short rawC0 = b.getShort();
+        short rawC1 = b.getShort();
+        b.get(colorIndices, 0, 4);
+
+        Rgba c0 = Rgba.from565(rawC0);
+        Rgba c1 = Rgba.from565(rawC1);
+        colors[0] = c0;
+        colors[1] = c1;
+        if (!oneBitAlpha || Short.compareUnsigned(rawC0, rawC1) > 0) {
+            colors[2] = c0.lerp(c1, 1.0f / 3.0f);
+            colors[3] = c0.lerp(c1, 2.0f / 3.0f);
+        } else {
+            colors[2] = c0.lerp(c1, 1.0f / 2.0f);
+            colors[3] = Rgba.TRANSPARENT;
+        }
+    }
+
+    private static Rgba colorLookupBc1(Rgba[] colors, byte[] colorIndices, int y, int x) {
+        int colorIndex = (Byte.toUnsignedInt(colorIndices[y]) >>> (2 * x)) & 0x3;
+        return colors[colorIndex];
+    }
+
+    private static void loadAlphaBc3(ByteBuffer b, float[] alphas, int[] alphaIndices) {
+        byte rawA0 = b.get();
+        byte rawA1 = b.get();
+        alphaIndices[0] = DdsHelper.read24(b);
+        alphaIndices[1] = DdsHelper.read24(b);
+
+        float a0 = Byte.toUnsignedInt(rawA0) / 255.0f;
+        float a1 = Byte.toUnsignedInt(rawA1) / 255.0f;
+
+        alphas[0] = a0;
+        alphas[1] = a1;
+        if (Byte.compareUnsigned(rawA0, rawA1) > 0) {
+            for (int i = 1; i <= 6; i++) {
+                alphas[i + 1] = ((7 - i) / 7.0f) * a0 + (i / 7.0f) * a1;
+            }
+        } else {
+            for (int i = 1; i <= 4; i++) {
+                alphas[i + 1] = ((5 - i) / 5.0f) * a0 + (i / 5.0f) * a1;
+            }
+            alphas[6] = 0.0f;
+            alphas[7] = 1.0f;
+        }
+    }
+
+    private static float alphaLookupBc3(float[] alphas, int[] alphaIndices, int y, int x) {
+        int alphaIndex = (alphaIndices[y >>> 1] >>> (3 * (((y & 0x1) << 2) | x))) & 0x7;
+        return alphas[alphaIndex];
+    }
+
     private static void bc1(int h, int w, WritableRaster raster, ByteBuffer b) {
-        int[] colors = new int[4];
-        byte[] table = new byte[4];
+        Rgba[] colors = new Rgba[4];
+        byte[] colorIndices = new byte[4];
         for (int y = 0; y < h; y += 4) {
             for (int x = 0; x < w; x += 4) {
-                short c0 = b.getShort();
-                short c1 = b.getShort();
-                b.get(table, 0, 4);
-
-                colors[0] = 0x10000 | Short.toUnsignedInt(c0);
-                colors[1] = 0x10000 | Short.toUnsignedInt(c1);
-                if (Short.compareUnsigned(c0, c1) > 0) {
-                    colors[2] = 0x10000 | Short.toUnsignedInt(DdsHelper.ip_565(c0, c1, 2, 1));
-                    colors[3] = 0x10000 | Short.toUnsignedInt(DdsHelper.ip_565(c0, c1, 1, 2));
-                } else {
-                    colors[2] = 0x10000 | Short.toUnsignedInt(DdsHelper.ip_565(c0, c1, 1, 1));
-                    colors[3] = 0;
-                }
+                loadColorsBc1(b, colors, colorIndices, true);
 
                 int yMax = Math.min(4, h - y);
                 int xMax = Math.min(4, w - x);
                 for (int y_ = 0; y_ < yMax; y_++) {
                     for (int x_ = 0; x_ < xMax; x_++) {
-                        int colorIndex = (table[y_] >>> (2 * x_)) & 0x3;
-                        raster.setDataElements(x + x_, y + y_, new int[] {colors[colorIndex]});
+                        Rgba color = colorLookupBc1(colors, colorIndices, y_, x_);
+                        raster.setDataElements(x + x_, y + y_, new int[] { color.asARGB() });
                     }
                 }
             }
@@ -56,29 +96,22 @@ public class DdsImageReader extends ImageReader {
     }
 
     private static void bc2(int h, int w, WritableRaster raster, ByteBuffer b) {
-        byte[] alpha = new byte[8];
-        short[] colors = new short[4];
-        byte[] table = new byte[4];
+        byte[] alphas = new byte[8];
+        Rgba[] colors = new Rgba[4];
+        byte[] colorIndices = new byte[4];
         for (int y = 0; y < h; y += 4) {
             for (int x = 0; x < w; x += 4) {
-                b.get(alpha, 0, 8);
-                short c0 = b.getShort();
-                short c1 = b.getShort();
-                b.get(table, 0, 4);
-
-                colors[0] = c0;
-                colors[1] = c1;
-                colors[2] = DdsHelper.ip_565(c0, c1, 2, 1);
-                colors[3] = DdsHelper.ip_565(c0, c1, 1, 2);
+                b.get(alphas, 0, 8);
+                loadColorsBc1(b, colors, colorIndices, false);
 
                 int yMax = Math.min(4, h - y);
                 int xMax = Math.min(4, w - x);
                 for (int y_ = 0; y_ < yMax; y_++) {
                     for (int x_ = 0; x_ < xMax; x_++) {
-                        int colorIndex = (table[y_] >>> (2 * x_)) & 0x3;
-                        int a = (alpha[(y_ << 1) | (x_ >> 1)] >>> (4 * (x_ & 0x1))) & 0xf;
-                        int color = (a << 16) | Short.toUnsignedInt(colors[colorIndex]);
-                        raster.setDataElements(x + x_, y + y_, new int[] {color});
+                        int a = (alphas[(y_ << 1) | (x_ >>> 1)] >>> (4 * (x_ & 0x1))) & 0xf;
+                        Rgba color = colorLookupBc1(colors, colorIndices, y_, x_)
+                                .withAlpha(a / 15.0f);
+                        raster.setDataElements(x + x_, y + y_, new int[] { color.asARGB() });
                     }
                 }
             }
@@ -86,51 +119,22 @@ public class DdsImageReader extends ImageReader {
     }
 
     private static void bc3(int h, int w, WritableRaster raster, ByteBuffer b) {
-        byte[] alpha = new byte[8];
-        int[] alphaTable = new int[2];
-        short[] colors = new short[4];
-        byte[] colorTable = new byte[4];
+        float[] alphas = new float[8];
+        int[] alphaIndices = new int[2];
+        Rgba[] colors = new Rgba[4];
+        byte[] colorIndices = new byte[4];
         for (int y = 0; y < h; y += 4) {
             for (int x = 0; x < w; x += 4) {
-                byte a0 = b.get();
-                byte a1 = b.get();
-                alphaTable[0] = DdsHelper.read24(b);
-                alphaTable[1] = DdsHelper.read24(b);
-                short c0 = b.getShort();
-                short c1 = b.getShort();
-                b.get(colorTable, 0, 4);
-
-                alpha[0] = a0;
-                alpha[1] = a1;
-                if (Byte.compareUnsigned(a0, a1) > 0) {
-                    alpha[2] = DdsHelper.ip_u8(a0, a1, 6, 1);
-                    alpha[3] = DdsHelper.ip_u8(a0, a1, 5, 2);
-                    alpha[4] = DdsHelper.ip_u8(a0, a1, 4, 3);
-                    alpha[5] = DdsHelper.ip_u8(a0, a1, 3, 4);
-                    alpha[6] = DdsHelper.ip_u8(a0, a1, 2, 5);
-                    alpha[7] = DdsHelper.ip_u8(a0, a1, 1, 6);
-                } else {
-                    alpha[2] = DdsHelper.ip_u8(a0, a1, 4, 1);
-                    alpha[3] = DdsHelper.ip_u8(a0, a1, 3, 2);
-                    alpha[4] = DdsHelper.ip_u8(a0, a1, 2, 3);
-                    alpha[5] = DdsHelper.ip_u8(a0, a1, 1, 4);
-                    alpha[6] = 0;
-                    alpha[7] = -1;
-                }
-
-                colors[0] = c0;
-                colors[1] = c1;
-                colors[2] = DdsHelper.ip_565(c0, c1, 2, 1);
-                colors[3] = DdsHelper.ip_565(c0, c1, 1, 2);
+                loadAlphaBc3(b, alphas, alphaIndices);
+                loadColorsBc1(b, colors, colorIndices, false);
 
                 int yMax = Math.min(4, h - y);
                 int xMax = Math.min(4, w - x);
                 for (int y_ = 0; y_ < yMax; y_++) {
                     for (int x_ = 0; x_ < xMax; x_++) {
-                        int colorIndex = (colorTable[y_] >>> (2 * x_)) & 0x3;
-                        int alphaIndex = (alphaTable[y_ >> 1] >>> (3 * (((y_ & 0x1) << 2) | x_))) & 0x7;
-                        int color = (Byte.toUnsignedInt(alpha[alphaIndex]) << 16) | Short.toUnsignedInt(colors[colorIndex]);
-                        raster.setDataElements(x + x_, y + y_, new int[] {color});
+                        Rgba color = colorLookupBc1(colors, colorIndices, y_, x_).withAlpha(alphaLookupBc3(alphas,
+                                alphaIndices, y_, x_));
+                        raster.setDataElements(x + x_, y + y_, new int[] { color.asARGB() });
                     }
                 }
             }
@@ -210,10 +214,10 @@ public class DdsImageReader extends ImageReader {
             for (int y = 0; y < h; y++) {
                 for (int x = 0; x < w; x++) {
                     Object arr = switch (bpp) {
-                        case 8 -> new byte[] {b.get()};
-                        case 16 -> new short[] {b.getShort()};
-                        case 24 -> new int[] {DdsHelper.read24(b)};
-                        case 32 -> new int[] {b.getInt()};
+                        case 8 -> new byte[] { b.get() };
+                        case 16 -> new short[] { b.getShort() };
+                        case 24 -> new int[] { DdsHelper.read24(b) };
+                        case 32 -> new int[] { b.getInt() };
                         default -> throw new RuntimeException("illegal bpp");
                     };
                     raster.setDataElements(x, y, arr);
