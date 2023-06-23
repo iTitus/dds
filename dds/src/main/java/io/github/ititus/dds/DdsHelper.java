@@ -61,4 +61,24 @@ public final class DdsHelper {
 
         return 1 + Integer.divideUnsigned(dividend - 1, divisor);
     }
+
+    private static boolean isPrintable(String s) {
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (Character.isISOControl(c)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static String guessToString(int n) {
+        String fourCC = DdsConstants.getStringFrom4CC(n);
+        if (isPrintable(fourCC)) {
+            return fourCC;
+        }
+
+        return Integer.toUnsignedString(n);
+    }
 }

@@ -158,13 +158,13 @@ public class DdsImageReader extends ImageReader {
     @Override
     public int getWidth(int imageIndex) throws IOException {
         loadAndCheckIndex(imageIndex);
-        return dds.width();
+        return dds.resources().get(imageIndex).getWidth();
     }
 
     @Override
     public int getHeight(int imageIndex) throws IOException {
         loadAndCheckIndex(imageIndex);
-        return dds.height();
+        return dds.resources().get(imageIndex).getHeight();
     }
 
     @Override

@@ -12,6 +12,8 @@ public record DdsHeaderDxt10(
         int miscFlags2
 ) {
 
+    public static final int SIZE = 20;
+
     public static DdsHeaderDxt10 load(DataReader r) throws IOException {
         return new DdsHeaderDxt10(
                 DxgiFormat.load(r),

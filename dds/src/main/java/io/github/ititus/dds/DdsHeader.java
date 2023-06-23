@@ -172,37 +172,37 @@ public record DdsHeader(
             list.add("dwMipMapCount=" + Integer.toUnsignedString(dwMipMapCount));
         }
         if (dwReserved1_0 != 0) {
-            list.add("dwReserved[0]=" + Integer.toUnsignedString(dwReserved1_0));
+            list.add("dwReserved[0]=" + DdsHelper.guessToString(dwReserved1_0));
         }
         if (dwReserved1_1 != 0) {
-            list.add("dwReserved[1]=" + Integer.toUnsignedString(dwReserved1_1));
+            list.add("dwReserved[1]=" + DdsHelper.guessToString(dwReserved1_1));
         }
         if (dwReserved1_2 != 0) {
-            list.add("dwReserved[2]=" + Integer.toUnsignedString(dwReserved1_2));
+            list.add("dwReserved[2]=" + DdsHelper.guessToString(dwReserved1_2));
         }
         if (dwReserved1_3 != 0) {
-            list.add("dwReserved[3]=" + Integer.toUnsignedString(dwReserved1_3));
+            list.add("dwReserved[3]=" + DdsHelper.guessToString(dwReserved1_3));
         }
         if (dwReserved1_4 != 0) {
-            list.add("dwReserved[4]=" + Integer.toUnsignedString(dwReserved1_4));
+            list.add("dwReserved[4]=" + DdsHelper.guessToString(dwReserved1_4));
         }
         if (dwReserved1_5 != 0) {
-            list.add("dwReserved[5]=" + Integer.toUnsignedString(dwReserved1_5));
+            list.add("dwReserved[5]=" + DdsHelper.guessToString(dwReserved1_5));
         }
         if (dwReserved1_6 != 0) {
-            list.add("dwReserved[6]=" + Integer.toUnsignedString(dwReserved1_6));
+            list.add("dwReserved[6]=" + DdsHelper.guessToString(dwReserved1_6));
         }
         if (dwReserved1_7 != 0) {
-            list.add("dwReserved[7]=" + Integer.toUnsignedString(dwReserved1_7));
+            list.add("dwReserved[7]=" + DdsHelper.guessToString(dwReserved1_7));
         }
         if (dwReserved1_8 != 0) {
-            list.add("dwReserved[8]=" + Integer.toUnsignedString(dwReserved1_8));
+            list.add("dwReserved[8]=" + DdsHelper.guessToString(dwReserved1_8));
         }
         if (dwReserved1_9 != 0) {
-            list.add("dwReserved[9]=" + Integer.toUnsignedString(dwReserved1_9));
+            list.add("dwReserved[9]=" + DdsHelper.guessToString(dwReserved1_9));
         }
         if (dwReserved1_10 != 0) {
-            list.add("dwReserved[10]=" + Integer.toUnsignedString(dwReserved1_10));
+            list.add("dwReserved[10]=" + DdsHelper.guessToString(dwReserved1_10));
         }
         if (dwCaps != 0) {
             list.add("dwCaps=0x" + Integer.toHexString(dwCaps));
@@ -217,7 +217,7 @@ public record DdsHeader(
             list.add("dwCaps4=0x" + Integer.toHexString(dwCaps4));
         }
         if (dwReserved2 != 0) {
-            list.add("dwReserved2=" + Integer.toUnsignedString(dwReserved2));
+            list.add("dwReserved2=" + DdsHelper.guessToString(dwReserved2));
         }
         list.add("ddspf=" + ddspf);
         return "DdsHeader[" + String.join(", ", list) + ']';

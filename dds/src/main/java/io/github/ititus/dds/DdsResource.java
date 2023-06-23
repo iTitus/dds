@@ -7,9 +7,22 @@ import java.util.List;
 
 public final class DdsResource {
 
+    private final int height;
+    private final int width;
+    private final int arrayIndex;
+    private final int faceIndex;
+    private final int mipmapLevel;
+    private final int zLevel;
     private final ByteBuffer buffer;
 
-    private DdsResource(ByteBuffer buffer) {
+    private DdsResource(int height, int width, int arrayIndex, int faceIndex, int mipmapLevel, int zLevel,
+                        ByteBuffer buffer) {
+        this.height = height;
+        this.width = width;
+        this.arrayIndex = arrayIndex;
+        this.faceIndex = faceIndex;
+        this.mipmapLevel = mipmapLevel;
+        this.zLevel = zLevel;
         this.buffer = buffer;
     }
 
@@ -32,16 +45,26 @@ public final class DdsResource {
                 for (int mipmap = 0; Integer.compareUnsigned(mipmap, mipMapCount) < 0; mipmap++) {
                     int size = DdsHelper.calculateSurfaceSize(currentHeight, currentWidth, format);
                     for (int z = 0; Integer.compareUnsigned(z, currentDepth) < 0; z++) {
-                        resources.add(load(r, size));
+                        /*System.out.printf(
+                                "loading resource: index=%d/%d, face=%d/%d, mipmap=%d/%d, z=%d/%d | height=%d, " +
+                                        "width=%d | size=%d%n",
+                                arrayIndex, arraySize, face, faces, mipmap, mipMapCount, z, currentDepth,
+                                currentHeight, currentWidth, size
+                        );*/
+                        resources.add(load(r, currentHeight, currentWidth, arrayIndex, face, mipmap, z, size));
                     }
 
-                    if (currentHeight == 1 && currentWidth == 1 && currentDepth == 1) {
-                        break;
+                    if (currentHeight > 1) {
+                        currentHeight = Integer.divideUnsigned(currentHeight, 2);
                     }
 
-                    currentHeight = DdsHelper.ceilDivUnsigned(currentHeight, 2);
-                    currentWidth = DdsHelper.ceilDivUnsigned(currentWidth, 2);
-                    currentDepth = DdsHelper.ceilDivUnsigned(currentDepth, 2);
+                    if (currentWidth > 1) {
+                        currentWidth = Integer.divideUnsigned(currentWidth, 2);
+                    }
+
+                    if (currentDepth > 1) {
+                        currentDepth = Integer.divideUnsigned(currentDepth, 2);
+                    }
                 }
             }
         }
@@ -49,14 +72,51 @@ public final class DdsResource {
         return List.copyOf(resources);
     }
 
-    public static DdsResource load(DataReader r, int size) throws IOException {
+    public static DdsResource load(DataReader r, int height, int width, int arrayIndex, int faceIndex,
+                                   int mipmapLevel, int zLevel, int size) throws IOException {
         ByteBuffer buf = ByteBuffer.allocate(size);
         r.read(buf, size);
         buf.flip();
-        return new DdsResource(buf.asReadOnlyBuffer());
+        return new DdsResource(height, width, arrayIndex, faceIndex, mipmapLevel, zLevel, buf.asReadOnlyBuffer());
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getArrayIndex() {
+        return arrayIndex;
+    }
+
+    public int getFaceIndex() {
+        return faceIndex;
+    }
+
+    public int getMipmapLevel() {
+        return mipmapLevel;
+    }
+
+    public int getZLevel() {
+        return zLevel;
     }
 
     public ByteBuffer getBuffer() {
         return buffer.duplicate();
+    }
+
+    @Override
+    public String toString() {
+        List<String> list = new ArrayList<>(6);
+        list.add("height=" + Integer.toUnsignedString(height));
+        list.add("width=" + Integer.toUnsignedString(width));
+        list.add("arrayIndex=" + Integer.toUnsignedString(arrayIndex));
+        list.add("faceIndex=" + Integer.toUnsignedString(faceIndex));
+        list.add("mipmapLevel=" + Integer.toUnsignedString(mipmapLevel));
+        list.add("zLevel=" + Integer.toUnsignedString(zLevel));
+        return "DdsResource[" + String.join(", ", list) + ']';
     }
 }
