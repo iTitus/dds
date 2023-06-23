@@ -3,7 +3,7 @@ package io.github.ititus.dds;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
-public enum D3dFormat {
+public enum D3dFormat implements PixelFormat {
 
     UNKNOWN(0),
     R8G8B8(20),
@@ -69,8 +69,7 @@ public enum D3dFormat {
     CxV8U8(117),
     A1(118),
     A2B10G10R10_XR_BIAS(119),
-    BINARYBUFFER(199),
-    FORCE_DWORD(0x7fffffff);
+    BINARYBUFFER(199);
 
     private static final D3dFormat[] VALUES = values();
 
@@ -90,7 +89,7 @@ public enum D3dFormat {
 
     public static D3dFormat get(int value) {
         for (D3dFormat f : VALUES) {
-            if (f != FORCE_DWORD && f.value == value) {
+            if (f.value == value) {
                 return f;
             }
         }
@@ -102,6 +101,7 @@ public enum D3dFormat {
         return ordinal();
     }
 
+    @Override
     public int getBitsPerPixel() {
         return switch (this) {
             case A1 -> 1;
@@ -119,10 +119,22 @@ public enum D3dFormat {
         };
     }
 
-    public boolean isBlockCompressed() {
+    @Override
+    public int getHorizontalPixelsPerBlock() {
         return switch (this) {
-            case DXT1, DXT2, DXT3, DXT4, DXT5 -> true;
-            default -> false;
+            case DXT1, DXT2, DXT3, DXT4, DXT5 -> 4;
+            case R8G8_B8G8, G8R8_G8B8, UYVY, YUY2 -> 2;
+            case UNKNOWN -> throw new IllegalStateException("unknown horizontal pixels per block for format " + this);
+            default -> 1;
+        };
+    }
+
+    @Override
+    public int getVerticalPixelsPerBlock() {
+        return switch (this) {
+            case DXT1, DXT2, DXT3, DXT4, DXT5 -> 4;
+            case UNKNOWN -> throw new IllegalStateException("unknown vertical pixels per block for format " + this);
+            default -> 1;
         };
     }
 }

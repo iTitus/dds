@@ -109,8 +109,7 @@ public record DdsHeader(
     }
 
     public boolean hasMipmaps() {
-        return (dwFlags & DDSD_MIPMAPCOUNT) == DDSD_MIPMAPCOUNT
-                && (dwCaps & DDSCAPS_MIPMAP) == DDSCAPS_MIPMAP;
+        return (dwFlags & DDSD_MIPMAPCOUNT) == DDSD_MIPMAPCOUNT && (dwCaps & DDSCAPS_MIPMAP) == DDSCAPS_MIPMAP;
     }
 
     public boolean isFlatTexture() {
@@ -156,7 +155,7 @@ public record DdsHeader(
     public String toString() {
         List<String> list = new ArrayList<>(24);
         if (dwSize != SIZE) {
-            list.add("dwSize=" + dwSize);
+            list.add("dwSize=" + Integer.toUnsignedString(dwSize));
         }
         if (dwFlags != 0) {
             list.add("dwFlags=0x" + Integer.toHexString(dwFlags));
@@ -164,46 +163,46 @@ public record DdsHeader(
         list.add("dwHeight=" + dwHeight);
         list.add("dwWidth=" + dwWidth);
         if (dwPitchOrLinearSize != 0) {
-            list.add((isUncompressed() ? "dwPitch=" : isCompressed() ? "dwLinearSize=" : "dwPitchOrLinearSize=") + dwPitchOrLinearSize);
+            list.add((isUncompressed() ? "dwPitch=" : isCompressed() ? "dwLinearSize=" : "dwPitchOrLinearSize=") + Integer.toUnsignedString(dwPitchOrLinearSize));
         }
         if (dwDepth != 0) {
-            list.add("dwDepth=" + dwDepth);
+            list.add("dwDepth=" + Integer.toUnsignedString(dwDepth));
         }
         if (dwMipMapCount != 0) {
-            list.add("dwMipMapCount=" + dwMipMapCount);
+            list.add("dwMipMapCount=" + Integer.toUnsignedString(dwMipMapCount));
         }
         if (dwReserved1_0 != 0) {
-            list.add("dwReserved[0]=" + dwReserved1_0);
+            list.add("dwReserved[0]=" + Integer.toUnsignedString(dwReserved1_0));
         }
         if (dwReserved1_1 != 0) {
-            list.add("dwReserved[1]=" + dwReserved1_1);
+            list.add("dwReserved[1]=" + Integer.toUnsignedString(dwReserved1_1));
         }
         if (dwReserved1_2 != 0) {
-            list.add("dwReserved[2]=" + dwReserved1_2);
+            list.add("dwReserved[2]=" + Integer.toUnsignedString(dwReserved1_2));
         }
         if (dwReserved1_3 != 0) {
-            list.add("dwReserved[3]=" + dwReserved1_3);
+            list.add("dwReserved[3]=" + Integer.toUnsignedString(dwReserved1_3));
         }
         if (dwReserved1_4 != 0) {
-            list.add("dwReserved[4]=" + dwReserved1_4);
+            list.add("dwReserved[4]=" + Integer.toUnsignedString(dwReserved1_4));
         }
         if (dwReserved1_5 != 0) {
-            list.add("dwReserved[5]=" + dwReserved1_5);
+            list.add("dwReserved[5]=" + Integer.toUnsignedString(dwReserved1_5));
         }
         if (dwReserved1_6 != 0) {
-            list.add("dwReserved[6]=" + dwReserved1_6);
+            list.add("dwReserved[6]=" + Integer.toUnsignedString(dwReserved1_6));
         }
         if (dwReserved1_7 != 0) {
-            list.add("dwReserved[7]=" + dwReserved1_7);
+            list.add("dwReserved[7]=" + Integer.toUnsignedString(dwReserved1_7));
         }
         if (dwReserved1_8 != 0) {
-            list.add("dwReserved[8]=" + dwReserved1_8);
+            list.add("dwReserved[8]=" + Integer.toUnsignedString(dwReserved1_8));
         }
         if (dwReserved1_9 != 0) {
-            list.add("dwReserved[9]=" + dwReserved1_9);
+            list.add("dwReserved[9]=" + Integer.toUnsignedString(dwReserved1_9));
         }
         if (dwReserved1_10 != 0) {
-            list.add("dwReserved[10]=" + dwReserved1_10);
+            list.add("dwReserved[10]=" + Integer.toUnsignedString(dwReserved1_10));
         }
         if (dwCaps != 0) {
             list.add("dwCaps=0x" + Integer.toHexString(dwCaps));
@@ -218,7 +217,7 @@ public record DdsHeader(
             list.add("dwCaps4=0x" + Integer.toHexString(dwCaps4));
         }
         if (dwReserved2 != 0) {
-            list.add("dwReserved2=" + dwReserved2);
+            list.add("dwReserved2=" + Integer.toUnsignedString(dwReserved2));
         }
         list.add("ddspf=" + ddspf);
         return "DdsHeader[" + String.join(", ", list) + ']';

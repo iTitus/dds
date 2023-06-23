@@ -25,39 +25,40 @@ public final class DdsIioHelper {
     }
 
     public static ImageTypeSpecifier imageType(DdsHeader header) {
-        DdsPixelformat pixelformat = header.ddspf();
-        if ((pixelformat.dwFlags() & DDS_RGBA) == DDS_RGBA) {
+        D3dFormat format = header.d3dFormat();
+        DdsPixelformat pf = header.ddspf();
+        if ((pf.dwFlags() & DDS_RGBA) == DDS_RGBA) {
             ColorModel cm = new DirectColorModel(
                     ColorSpace.getInstance(RGB_COLORSPACE),
-                    pixelformat.dwRGBBitCount(),
-                    pixelformat.dwRBitMask(),
-                    pixelformat.dwGBitMask(),
-                    pixelformat.dwBBitMask(),
-                    pixelformat.dwABitMask(),
+                    pf.dwRGBBitCount(),
+                    pf.dwRBitMask(),
+                    pf.dwGBitMask(),
+                    pf.dwBBitMask(),
+                    pf.dwABitMask(),
                     false,
-                    findBestTransferType(pixelformat)
+                    findBestTransferType(format)
             );
             return new ImageTypeSpecifier(
                     cm,
                     cm.createCompatibleSampleModel(1, 1)
             );
-        } else if ((pixelformat.dwFlags() & DDPF_RGB) == DDPF_RGB) {
+        } else if ((pf.dwFlags() & DDPF_RGB) == DDPF_RGB) {
             ColorModel cm = new DirectColorModel(
                     ColorSpace.getInstance(RGB_COLORSPACE),
-                    pixelformat.dwRGBBitCount(),
-                    pixelformat.dwRBitMask(),
-                    pixelformat.dwGBitMask(),
-                    pixelformat.dwBBitMask(),
+                    pf.dwRGBBitCount(),
+                    pf.dwRBitMask(),
+                    pf.dwGBitMask(),
+                    pf.dwBBitMask(),
                     0,
                     false,
-                    findBestTransferType(pixelformat)
+                    findBestTransferType(format)
             );
             return new ImageTypeSpecifier(
                     cm,
                     cm.createCompatibleSampleModel(1, 1)
             );
-        } else if ((pixelformat.dwFlags() & DdsConstants.DDPF_FOURCC) == DdsConstants.DDPF_FOURCC) {
-            if (pixelformat.dwFourCC() == D3DFMT_DXT1) {
+        } else if ((pf.dwFlags() & DdsConstants.DDPF_FOURCC) == DdsConstants.DDPF_FOURCC) {
+            if (pf.dwFourCC() == D3DFMT_DXT1) {
                 ColorModel cm = new DirectColorModel(
                         ColorSpace.getInstance(RGB_COLORSPACE),
                         32,
@@ -72,7 +73,7 @@ public final class DdsIioHelper {
                         cm,
                         cm.createCompatibleSampleModel(1, 1)
                 );
-            } else if (pixelformat.dwFourCC() == D3DFMT_DXT2 || pixelformat.dwFourCC() == D3DFMT_DXT3) {
+            } else if (pf.dwFourCC() == D3DFMT_DXT2 || pf.dwFourCC() == D3DFMT_DXT3) {
                 ColorModel cm = new DirectColorModel(
                         ColorSpace.getInstance(RGB_COLORSPACE),
                         32,
@@ -80,14 +81,14 @@ public final class DdsIioHelper {
                         0x0000ff00,
                         0x000000ff,
                         0xff000000,
-                        pixelformat.dwFourCC() == D3DFMT_DXT2,
+                        pf.dwFourCC() == D3DFMT_DXT2,
                         DataBuffer.TYPE_INT
                 );
                 return new ImageTypeSpecifier(
                         cm,
                         cm.createCompatibleSampleModel(1, 1)
                 );
-            } else if (pixelformat.dwFourCC() == D3DFMT_DXT4 || pixelformat.dwFourCC() == D3DFMT_DXT5) {
+            } else if (pf.dwFourCC() == D3DFMT_DXT4 || pf.dwFourCC() == D3DFMT_DXT5) {
                 ColorModel cm = new DirectColorModel(
                         ColorSpace.getInstance(RGB_COLORSPACE),
                         32,
@@ -95,7 +96,7 @@ public final class DdsIioHelper {
                         0x0000ff00,
                         0x000000ff,
                         0xff000000,
-                        pixelformat.dwFourCC() == D3DFMT_DXT4,
+                        pf.dwFourCC() == D3DFMT_DXT4,
                         DataBuffer.TYPE_INT
                 );
                 return new ImageTypeSpecifier(
@@ -113,12 +114,8 @@ public final class DdsIioHelper {
         throw new UnsupportedOperationException("unsupported format: " + header + " " + header10);
     }
 
-    public static int findBestTransferType(DdsPixelformat pixelformat) {
-        return findBestTransferType(pixelformat.d3dFormat().getBitsPerPixel());
-    }
-
-    public static int findBestTransferType(DdsHeaderDxt10 header) {
-        return findBestTransferType(header.dxgiFormat().getBitsPerPixel());
+    public static int findBestTransferType(PixelFormat format) {
+        return findBestTransferType(format.getBitsPerPixel());
     }
 
     public static int findBestTransferType(int bpp) {

@@ -29,15 +29,15 @@ public class DdsImageReader extends ImageReader {
         short rawC1 = b.getShort();
         b.get(colorIndices, 0, 4);
 
-        Rgba c0 = Rgba.fromR5G6B5(rawC0);
-        Rgba c1 = Rgba.fromR5G6B5(rawC1);
+        var c0 = Rgba.fromR5G6B5(rawC0);
+        var c1 = Rgba.fromR5G6B5(rawC1);
         colors[0] = c0;
         colors[1] = c1;
         if (!oneBitAlpha || Short.compareUnsigned(rawC0, rawC1) > 0) {
-            colors[2] = c0.lerp(c1, 1.0f / 3.0f);
-            colors[3] = c0.lerp(c1, 2.0f / 3.0f);
+            colors[2] = c0.lerp(c1, 2, 1);
+            colors[3] = c0.lerp(c1, 1, 2);
         } else {
-            colors[2] = c0.lerp(c1, 1.0f / 2.0f);
+            colors[2] = c0.lerp(c1, 1, 1);
             colors[3] = Rgba.TRANSPARENT;
         }
     }
@@ -47,47 +47,52 @@ public class DdsImageReader extends ImageReader {
         return colors[colorIndex];
     }
 
-    private static void loadAlphaBc3(ByteBuffer b, float[] alphas, int[] alphaIndices) {
+    private static byte alphaLookupBc2(byte[] alphas, int y, int x) {
+        int alpha = (alphas[(y << 1) | (x >>> 1)] >>> (4 * (x & 0x1))) & 0xf;
+        return (byte) (alpha * 17);
+    }
+
+    private static void loadAlphaBc3(ByteBuffer b, byte[] alphas, int[] alphaIndices) {
         byte rawA0 = b.get();
         byte rawA1 = b.get();
         alphaIndices[0] = DdsHelper.read24(b);
         alphaIndices[1] = DdsHelper.read24(b);
 
-        float a0 = Byte.toUnsignedInt(rawA0) / 255.0f;
-        float a1 = Byte.toUnsignedInt(rawA1) / 255.0f;
+        int a0 = Byte.toUnsignedInt(rawA0);
+        int a1 = Byte.toUnsignedInt(rawA1);
 
-        alphas[0] = a0;
-        alphas[1] = a1;
+        alphas[0] = rawA0;
+        alphas[1] = rawA1;
         if (Byte.compareUnsigned(rawA0, rawA1) > 0) {
             for (int i = 1; i <= 6; i++) {
-                alphas[i + 1] = ((7 - i) / 7.0f) * a0 + (i / 7.0f) * a1;
+                alphas[i + 1] = (byte) (((7 - i) * a0 + i * a1) / 7);
             }
         } else {
             for (int i = 1; i <= 4; i++) {
-                alphas[i + 1] = ((5 - i) / 5.0f) * a0 + (i / 5.0f) * a1;
+                alphas[i + 1] = (byte) (((5 - i) * a0 + i * a1) / 5);
             }
-            alphas[6] = 0.0f;
-            alphas[7] = 1.0f;
+            alphas[6] = 0;
+            alphas[7] = (byte) 255;
         }
     }
 
-    private static float alphaLookupBc3(float[] alphas, int[] alphaIndices, int y, int x) {
+    private static byte alphaLookupBc3(byte[] alphas, int[] alphaIndices, int y, int x) {
         int alphaIndex = (alphaIndices[y >>> 1] >>> (3 * (((y & 0x1) << 2) | x))) & 0x7;
         return alphas[alphaIndex];
     }
 
     private static void bc1(int h, int w, WritableRaster raster, ByteBuffer b) {
-        Rgba[] colors = new Rgba[4];
-        byte[] colorIndices = new byte[4];
-        for (int y = 0; y < h; y += 4) {
-            for (int x = 0; x < w; x += 4) {
+        var colors = new Rgba[4];
+        var colorIndices = new byte[4];
+        for (int y = 0; Integer.compareUnsigned(y, h) < 0; y += 4) {
+            for (int x = 0; Integer.compareUnsigned(x, w) < 0; x += 4) {
                 loadColorsBc1(b, colors, colorIndices, true);
 
                 int yMax = Math.min(4, h - y);
                 int xMax = Math.min(4, w - x);
                 for (int y_ = 0; y_ < yMax; y_++) {
                     for (int x_ = 0; x_ < xMax; x_++) {
-                        Rgba color = colorLookupBc1(colors, colorIndices, y_, x_);
+                        var color = colorLookupBc1(colors, colorIndices, y_, x_);
                         raster.setDataElements(x + x_, y + y_, new int[] { color.asA8R8G8B8() });
                     }
                 }
@@ -96,11 +101,11 @@ public class DdsImageReader extends ImageReader {
     }
 
     private static void bc2(int h, int w, WritableRaster raster, ByteBuffer b) {
-        byte[] alphas = new byte[8];
-        Rgba[] colors = new Rgba[4];
-        byte[] colorIndices = new byte[4];
-        for (int y = 0; y < h; y += 4) {
-            for (int x = 0; x < w; x += 4) {
+        var alphas = new byte[8];
+        var colors = new Rgba[4];
+        var colorIndices = new byte[4];
+        for (int y = 0; Integer.compareUnsigned(y, h) < 0; y += 4) {
+            for (int x = 0; Integer.compareUnsigned(x, w) < 0; x += 4) {
                 b.get(alphas, 0, 8);
                 loadColorsBc1(b, colors, colorIndices, false);
 
@@ -108,9 +113,8 @@ public class DdsImageReader extends ImageReader {
                 int xMax = Math.min(4, w - x);
                 for (int y_ = 0; y_ < yMax; y_++) {
                     for (int x_ = 0; x_ < xMax; x_++) {
-                        int a = (alphas[(y_ << 1) | (x_ >>> 1)] >>> (4 * (x_ & 0x1))) & 0xf;
-                        Rgba color = colorLookupBc1(colors, colorIndices, y_, x_)
-                                .withAlpha(a / 15.0f);
+                        var alpha = alphaLookupBc2(alphas, y_, x_);
+                        var color = colorLookupBc1(colors, colorIndices, y_, x_).withAlpha(alpha);
                         raster.setDataElements(x + x_, y + y_, new int[] { color.asA8R8G8B8() });
                     }
                 }
@@ -119,12 +123,12 @@ public class DdsImageReader extends ImageReader {
     }
 
     private static void bc3(int h, int w, WritableRaster raster, ByteBuffer b) {
-        float[] alphas = new float[8];
-        int[] alphaIndices = new int[2];
-        Rgba[] colors = new Rgba[4];
-        byte[] colorIndices = new byte[4];
-        for (int y = 0; y < h; y += 4) {
-            for (int x = 0; x < w; x += 4) {
+        var alphas = new byte[8];
+        var alphaIndices = new int[2];
+        var colors = new Rgba[4];
+        var colorIndices = new byte[4];
+        for (int y = 0; Integer.compareUnsigned(y, h) < 0; y += 4) {
+            for (int x = 0; Integer.compareUnsigned(x, w) < 0; x += 4) {
                 loadAlphaBc3(b, alphas, alphaIndices);
                 loadColorsBc1(b, colors, colorIndices, false);
 
@@ -132,8 +136,8 @@ public class DdsImageReader extends ImageReader {
                 int xMax = Math.min(4, w - x);
                 for (int y_ = 0; y_ < yMax; y_++) {
                     for (int x_ = 0; x_ < xMax; x_++) {
-                        Rgba color = colorLookupBc1(colors, colorIndices, y_, x_)
-                                .withAlpha(alphaLookupBc3(alphas, alphaIndices, y_, x_));
+                        var alpha = alphaLookupBc3(alphas, alphaIndices, y_, x_);
+                        var color = colorLookupBc1(colors, colorIndices, y_, x_).withAlpha(alpha);
                         raster.setDataElements(x + x_, y + y_, new int[] { color.asA8R8G8B8() });
                     }
                 }
@@ -185,8 +189,7 @@ public class DdsImageReader extends ImageReader {
         loadAndCheckIndex(imageIndex);
 
         DdsResource resource = dds.resources().get(imageIndex);
-        DdsSurface surface = resource.getSurfaces().get(0); // TODO: make this addressable
-        ByteBuffer b = surface.getBuffer();
+        ByteBuffer b = resource.getBuffer();
         b.order(ByteOrder.LITTLE_ENDIAN);
 
         int h = getHeight(imageIndex);
@@ -194,35 +197,30 @@ public class DdsImageReader extends ImageReader {
         BufferedImage img = getDestination(param, getImageTypes(imageIndex), w, h);
         WritableRaster raster = img.getRaster();
 
-        if (dds.isDxt10()) {
-            // TODO: support dxgi format as well
-            throw new UnsupportedOperationException("dxt10 header not supported");
-        } else {
-            if (dds.header().isVolumeTexture()) {
-                throw new UnsupportedOperationException("volume textures not supported");
-            }
-
-            D3dFormat d3dFormat = dds.d3dFormat();
-            if (d3dFormat.isBlockCompressed()) {
-                switch (d3dFormat) {
-                    case DXT1 -> bc1(h, w, raster, b);
-                    case DXT2, DXT3 -> bc2(h, w, raster, b);
-                    case DXT4, DXT5 -> bc3(h, w, raster, b);
-                    default -> throw new RuntimeException("unsupported block compression: " + d3dFormat);
-                }
+        PixelFormat format = dds.isDxt10() ? dds.dxgiFormat() : dds.d3dFormat();
+        if (format.isBlockCompressed()) {
+            if (format == D3dFormat.DXT1 || format == DxgiFormat.BC1_TYPELESS || format == DxgiFormat.BC1_UNORM || format == DxgiFormat.BC1_UNORM_SRGB) {
+                bc1(h, w, raster, b);
+            } else if (format == D3dFormat.DXT2 || format == D3dFormat.DXT3 || format == DxgiFormat.BC2_TYPELESS || format == DxgiFormat.BC2_UNORM || format == DxgiFormat.BC2_UNORM_SRGB) {
+                bc2(h, w, raster, b);
+            } else if (format == D3dFormat.DXT4 || format == D3dFormat.DXT5 || format == DxgiFormat.BC3_TYPELESS || format == DxgiFormat.BC3_UNORM || format == DxgiFormat.BC3_UNORM_SRGB) {
+                bc3(h, w, raster, b);
             } else {
-                int bpp = d3dFormat.getBitsPerPixel();
-                for (int y = 0; y < h; y++) {
-                    for (int x = 0; x < w; x++) {
-                        Object arr = switch (bpp) {
-                            case 8 -> new byte[] { b.get() };
-                            case 16 -> new short[] { b.getShort() };
-                            case 24 -> new int[] { DdsHelper.read24(b) };
-                            case 32 -> new int[] { b.getInt() };
-                            default -> throw new RuntimeException("unsupported bpp: " + bpp); // TODO: support other bpp
-                        };
-                        raster.setDataElements(x, y, arr);
-                    }
+                throw new RuntimeException("unsupported block compression: " + format);
+            }
+        } else {
+            int bpp = format.getBitsPerPixel();
+            for (int y = 0; Integer.compareUnsigned(y, h) < 0; y++) {
+                for (int x = 0; Integer.compareUnsigned(x, w) < 0; x++) {
+                    // TODO: support other bpp
+                    Object arr = switch (bpp) {
+                        case 8 -> new byte[] { b.get() };
+                        case 16 -> new short[] { b.getShort() };
+                        case 24 -> new int[] { DdsHelper.read24(b) };
+                        case 32 -> new int[] { b.getInt() };
+                        default -> throw new RuntimeException("unsupported bpp " + bpp + " for format: " + format);
+                    };
+                    raster.setDataElements(x, y, arr);
                 }
             }
         }

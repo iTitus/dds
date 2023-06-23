@@ -22,14 +22,12 @@ public record DdsHeaderDxt10(
         );
     }
 
-    public int resourceCount() {
-        return arraySize != 0 ? arraySize : 1;
-    }
-
     public boolean isValid(DdsHeader header) {
         if (arraySize == 0) {
             return false;
         } else if (dxgiFormat.getBitsPerPixel() == 0) {
+            return false;
+        } else if (header.isVolumeTexture() && arraySize != 1) {
             return false;
         }
 
@@ -64,7 +62,7 @@ public record DdsHeaderDxt10(
             list.add("miscFlag=0x" + Integer.toHexString(miscFlag));
         }
         if (arraySize != 0) {
-            list.add("arraySize=" + arraySize);
+            list.add("arraySize=" + Integer.toUnsignedString(arraySize));
         }
         if (miscFlags2 != 0) {
             list.add("miscFlags2=0x" + Integer.toHexString(miscFlags2));

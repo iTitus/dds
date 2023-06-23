@@ -3,7 +3,7 @@ package io.github.ititus.dds;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
-public enum DxgiFormat {
+public enum DxgiFormat implements PixelFormat {
 
     UNKNOWN(0),
     R32G32B32A32_TYPELESS(1),
@@ -123,10 +123,7 @@ public enum DxgiFormat {
     B4G4R4A4_UNORM(115),
     P208(130),
     V208(131),
-    V408(132),
-    SAMPLER_FEEDBACK_MIN_MIP_OPAQUE(189),
-    SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE(190),
-    FORCE_UINT(0xffffffff);
+    V408(132);
 
     private static final DxgiFormat[] VALUES = values();
 
@@ -146,7 +143,7 @@ public enum DxgiFormat {
 
     public static DxgiFormat get(int value) {
         for (DxgiFormat f : VALUES) {
-            if (f != FORCE_UINT && f.value == value) {
+            if (f.value == value) {
                 return f;
             }
         }
@@ -158,6 +155,7 @@ public enum DxgiFormat {
         return ordinal();
     }
 
+    @Override
     public int getBitsPerPixel() {
         return switch (this) {
             case R32G32B32A32_TYPELESS, R32G32B32A32_FLOAT, R32G32B32A32_UINT, R32G32B32A32_SINT -> 128;
@@ -191,6 +189,36 @@ public enum DxgiFormat {
                     BC4_TYPELESS, BC4_UNORM, BC4_SNORM -> 4;
             case R1_UNORM -> 1;
             default -> throw new IllegalStateException("unknown bpp for format " + this);
+        };
+    }
+
+    @Override
+    public int getHorizontalPixelsPerBlock() {
+        // TODO: implement
+        return switch (this) {
+            case BC1_TYPELESS, BC1_UNORM, BC1_UNORM_SRGB,
+                    BC2_TYPELESS, BC2_UNORM, BC2_UNORM_SRGB,
+                    BC3_TYPELESS, BC3_UNORM, BC3_UNORM_SRGB,
+                    BC4_TYPELESS, BC4_UNORM, BC4_SNORM,
+                    BC5_TYPELESS, BC5_UNORM, BC5_SNORM,
+                    BC6H_TYPELESS, BC6H_UF16, BC6H_SF16,
+                    BC7_TYPELESS, BC7_UNORM, BC7_UNORM_SRGB -> 4;
+            default -> throw new IllegalStateException("unsupported horizontal pixels per block for format " + this);
+        };
+    }
+
+    @Override
+    public int getVerticalPixelsPerBlock() {
+        // TODO: implement
+        return switch (this) {
+            case BC1_TYPELESS, BC1_UNORM, BC1_UNORM_SRGB,
+                    BC2_TYPELESS, BC2_UNORM, BC2_UNORM_SRGB,
+                    BC3_TYPELESS, BC3_UNORM, BC3_UNORM_SRGB,
+                    BC4_TYPELESS, BC4_UNORM, BC4_SNORM,
+                    BC5_TYPELESS, BC5_UNORM, BC5_SNORM,
+                    BC6H_TYPELESS, BC6H_UF16, BC6H_SF16,
+                    BC7_TYPELESS, BC7_UNORM, BC7_UNORM_SRGB -> 4;
+            default -> throw new IllegalStateException("unsupported vertical pixels per block for format " + this);
         };
     }
 }

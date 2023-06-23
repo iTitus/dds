@@ -92,24 +92,15 @@ public record DdsFile(
             header10 = null;
         }
 
-        int resourceCount = header10 != null ? header10.resourceCount() : 1;
-        DdsResource[] resources = new DdsResource[resourceCount];
-        for (int i = 0; Integer.compareUnsigned(i, resourceCount) < 0; i++) {
-            resources[i] = DdsResource.load(r, header, header10);
-        }
+        List<DdsResource> resources = DdsResource.loadAll(r, header, header10);
 
-        int unconsumed = 0;
         try {
-            for (; ; unconsumed++) {
-                r.readByte();
-            }
+            r.readByte();
+            throw new IOException("unconsumed bytes");
         } catch (EOFException ignored) {
-            if (unconsumed > 0) {
-                throw new IOException(unconsumed + " unconsumed bytes");
-            }
         }
 
-        return new DdsFile(header, header10, List.of(resources));
+        return new DdsFile(header, header10, resources);
     }
 
     public int height() {
@@ -149,7 +140,7 @@ public record DdsFile(
     }
 
     public int resourceCount() {
-        return header10 != null ? header10.resourceCount() : 1;
+        return resources.size();
     }
 
     @Override

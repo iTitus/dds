@@ -16,7 +16,11 @@ public final class Example {
     public static void main(String[] args) throws Exception {
         Path desktop = Path.of(System.getProperty("user.home"), "Desktop").toRealPath();
 
-        var file = desktop.resolve("ce_frame_circle.dds");
+        showInfoAndConvertToPng(desktop.resolve("ce_frame_circle.dds"));
+        showInfoAndConvertToPng(desktop.resolve("ce_dragon_bhutan.dds"));
+    }
+
+    private static void showInfoAndConvertToPng(Path file) throws Exception {
         showInfo(file);
         convertTo(file, "png");
     }

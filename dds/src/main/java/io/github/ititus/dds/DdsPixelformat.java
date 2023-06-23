@@ -157,7 +157,7 @@ public record DdsPixelformat(
     public String toString() {
         List<String> list = new ArrayList<>(8);
         if (dwSize != SIZE) {
-            list.add("dwSize=" + dwSize);
+            list.add("dwSize=" + Integer.toUnsignedString(dwSize));
         }
         if (dwFlags != 0) {
             list.add("dwFlags=0x" + Integer.toHexString(dwFlags));
@@ -166,7 +166,7 @@ public record DdsPixelformat(
             list.add("dwFourCC=" + getStringFrom4CC(dwFourCC));
         }
         if (dwRGBBitCount != 0) {
-            list.add("dwRGBBitCount=" + dwRGBBitCount);
+            list.add("dwRGBBitCount=" + Integer.toUnsignedString(dwRGBBitCount));
         }
         if (dwRBitMask != 0) {
             list.add("dwRBitMask=0x" + Integer.toHexString(dwRBitMask));

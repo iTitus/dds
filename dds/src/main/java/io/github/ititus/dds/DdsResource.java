@@ -1,52 +1,62 @@
 package io.github.ititus.dds;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 public final class DdsResource {
 
-    private final List<DdsSurface> surfaces;
+    private final ByteBuffer buffer;
 
-    private DdsResource(List<DdsSurface> surfaces) {
-        this.surfaces = surfaces;
+    private DdsResource(ByteBuffer buffer) {
+        this.buffer = buffer;
     }
 
-    public static DdsResource load(DataReader r, DdsHeader header, DdsHeaderDxt10 header10) throws IOException {
-        List<DdsSurface> surfaces = new ArrayList<>();
-        if (header10 != null) {
-            // TODO: support dxgi format as well
-            throw new UnsupportedOperationException("dxt10 header not supported");
-        } else {
-            D3dFormat d3dFormat = header.d3dFormat();
+    public static List<DdsResource> loadAll(DataReader r, DdsHeader header, DdsHeaderDxt10 header10) throws IOException {
+        List<DdsResource> resources = new ArrayList<>();
 
-            int mipMapCount = header.hasMipmaps() ? DdsHelper.maxUnsigned(1, header.dwMipMapCount()) : 1;
-            int depth = header.isVolumeTexture() ? DdsHelper.maxUnsigned(1, header.dwDepth()) : 1;
-            int faces = header.isCubemap() ? DdsHelper.maxUnsigned(1, header.calculateCubemapFaces()) : 1;
+        int height = DdsHelper.maxUnsigned(1, header.dwHeight());
+        int width = DdsHelper.maxUnsigned(1, header.dwWidth());
+        int depth = header.isVolumeTexture() ? DdsHelper.maxUnsigned(1, header.dwDepth()) : 1;
+        int mipMapCount = header.hasMipmaps() ? DdsHelper.maxUnsigned(1, header.dwMipMapCount()) : 1;
+        int faces = header.isCubemap() ? DdsHelper.maxUnsigned(1, header.calculateCubemapFaces()) : 1;
+        int arraySize = header10 != null ? DdsHelper.maxUnsigned(1, header10.arraySize()) : 1;
+        PixelFormat format = header10 != null ? header10.dxgiFormat() : header.d3dFormat();
 
+        for (int arrayIndex = 0; Integer.compareUnsigned(arrayIndex, arraySize) < 0; arrayIndex++) {
             for (int face = 0; Integer.compareUnsigned(face, faces) < 0; face++) {
-                int height = header.dwHeight();
-                int width = header.dwWidth();
+                int currentHeight = height;
+                int currentWidth = width;
                 int currentDepth = depth;
                 for (int mipmap = 0; Integer.compareUnsigned(mipmap, mipMapCount) < 0; mipmap++) {
-                    int size = DdsHelper.calculateSurfaceSize(height, width, d3dFormat) * currentDepth;
-                    surfaces.add(DdsSurface.load(r, size));
+                    int size = DdsHelper.calculateSurfaceSize(currentHeight, currentWidth, format);
+                    for (int z = 0; Integer.compareUnsigned(z, currentDepth) < 0; z++) {
+                        resources.add(load(r, size));
+                    }
 
-                    if (height == 1 && width == 1 && currentDepth == 1) {
+                    if (currentHeight == 1 && currentWidth == 1 && currentDepth == 1) {
                         break;
                     }
 
-                    height = DdsHelper.ceilDivUnsigned(height, 2);
-                    width = DdsHelper.ceilDivUnsigned(width, 2);
+                    currentHeight = DdsHelper.ceilDivUnsigned(currentHeight, 2);
+                    currentWidth = DdsHelper.ceilDivUnsigned(currentWidth, 2);
                     currentDepth = DdsHelper.ceilDivUnsigned(currentDepth, 2);
                 }
             }
         }
 
-        return new DdsResource(List.copyOf(surfaces));
+        return List.copyOf(resources);
     }
 
-    public List<DdsSurface> getSurfaces() {
-        return surfaces;
+    public static DdsResource load(DataReader r, int size) throws IOException {
+        ByteBuffer buf = ByteBuffer.allocate(size);
+        r.read(buf, size);
+        buf.flip();
+        return new DdsResource(buf.asReadOnlyBuffer());
+    }
+
+    public ByteBuffer getBuffer() {
+        return buffer.duplicate();
     }
 }

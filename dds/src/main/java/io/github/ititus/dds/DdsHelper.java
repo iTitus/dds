@@ -8,21 +8,22 @@ public final class DdsHelper {
     private DdsHelper() {
     }
 
-    public static int calculatePitch(D3dFormat d3dFormat, int width) {
-        return switch (d3dFormat) {
-            case DXT1 -> maxUnsigned(1, ceilDivUnsigned(width, 4)) * 8;
-            case DXT2, DXT3, DXT4, DXT5 -> maxUnsigned(1, ceilDivUnsigned(width, 4)) * 16;
-            case R8G8_B8G8, G8R8_G8B8, UYVY, YUY2 -> ceilDivUnsigned(width, 2) * 4;
-            default -> ceilDivUnsigned(width * d3dFormat.getBitsPerPixel(), 8);
-        };
+    public static int calculatePitch(int width, PixelFormat format) {
+        int horizontalBlocks = maxUnsigned(1, ceilDivUnsigned(width, format.getHorizontalPixelsPerBlock()));
+        int bitsPerBlock = format.getBitsPerBlock();
+        if (bitsPerBlock % 8 == 0) {
+            int bytesPerBlock = bitsPerBlock / 8;
+            return horizontalBlocks * bytesPerBlock;
+        }
+
+        int bits = Math.multiplyExact(horizontalBlocks, format.getBitsPerBlock());
+        return ceilDivUnsigned(bits, 8);
     }
 
-    public static int calculateSurfaceSize(int height, int width, D3dFormat d3dFormat) {
-        int pitch = DdsHelper.calculatePitch(d3dFormat, width);
-        return switch (d3dFormat) {
-            case DXT1, DXT2, DXT3, DXT4, DXT5 -> pitch * ceilDivUnsigned(height, 4);
-            default -> pitch * height;
-        };
+    public static int calculateSurfaceSize(int height, int width, PixelFormat format) {
+        int pitch = DdsHelper.calculatePitch(width, format);
+        int verticalBlocks = maxUnsigned(1, ceilDivUnsigned(height, format.getVerticalPixelsPerBlock()));
+        return Math.multiplyExact(pitch, verticalBlocks);
     }
 
     public static int read24(ByteBuffer b) {
@@ -54,6 +55,8 @@ public final class DdsHelper {
     public static int ceilDivUnsigned(int dividend, int divisor) {
         if (dividend == 0) {
             return 0;
+        } else if (divisor == 1) {
+            return dividend;
         }
 
         return 1 + Integer.divideUnsigned(dividend - 1, divisor);
