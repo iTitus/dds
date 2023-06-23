@@ -71,15 +71,15 @@ public record DdsHeader(
     public boolean isValid(boolean strict) {
         if (dwSize != SIZE) {
             return false;
-        } else if (strict && (dwCaps & DDSCAPS_TEXTURE) != DDSCAPS_TEXTURE) {
+        } else if (strict && (dwFlags & DDS_HEADER_FLAGS_TEXTURE) != DDS_HEADER_FLAGS_TEXTURE) {
             return false;
-        } else if ((dwFlags & DDS_HEADER_FLAGS_TEXTURE) != DDS_HEADER_FLAGS_TEXTURE) {
+        } else if (strict && (dwCaps & DDSCAPS_TEXTURE) != DDSCAPS_TEXTURE) {
             return false;
         } else if (isUncompressed() && isCompressed()) {
             return false;
         } else if (isCubemap() && isVolumeTexture()) {
             return false;
-        } else if (hasDepth() && !isVolumeTexture()) {
+        } else if (hasDepth() != isVolumeTexture()) {
             return false;
         } else if (strict && isBlockCompressed() && (dwHeight % 4 != 0 || dwWidth % 4 != 0)) {
             return false;

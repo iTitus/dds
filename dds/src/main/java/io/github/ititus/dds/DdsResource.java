@@ -27,16 +27,18 @@ public final class DdsResource {
             for (int face = 0; Integer.compareUnsigned(face, faces) < 0; face++) {
                 int height = header.dwHeight();
                 int width = header.dwWidth();
+                int currentDepth = depth;
                 for (int mipmap = 0; Integer.compareUnsigned(mipmap, mipMapCount) < 0; mipmap++) {
-                    int size = DdsHelper.calculateSurfaceSize(height, width, d3dFormat) * depth;
+                    int size = DdsHelper.calculateSurfaceSize(height, width, d3dFormat) * currentDepth;
                     surfaces.add(DdsSurface.load(r, size));
 
-                    if (height == 1 && width == 1) {
+                    if (height == 1 && width == 1 && currentDepth == 1) {
                         break;
                     }
 
-                    height = Math.max(1, height / 2);
-                    width = Math.max(1, width / 2);
+                    height = DdsHelper.ceilDivUnsigned(height, 2);
+                    width = DdsHelper.ceilDivUnsigned(width, 2);
+                    currentDepth = DdsHelper.ceilDivUnsigned(currentDepth, 2);
                 }
             }
         }

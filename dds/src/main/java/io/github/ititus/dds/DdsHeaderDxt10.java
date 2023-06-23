@@ -35,15 +35,15 @@ public record DdsHeaderDxt10(
 
         switch (resourceDimension) {
             case D3D10_RESOURCE_DIMENSION_TEXTURE1D -> {
-                if ((header.dwFlags() & DdsConstants.DDSD_HEIGHT) != 0 && header.dwHeight() != 1) {
+                if ((header.dwFlags() & DdsConstants.DDSD_HEIGHT) != DdsConstants.DDSD_HEIGHT || header.dwHeight() != 1) {
                     return false;
                 }
             }
             case D3D10_RESOURCE_DIMENSION_TEXTURE2D -> {}
             case D3D10_RESOURCE_DIMENSION_TEXTURE3D -> {
-                if ((header.dwFlags() & DdsConstants.DDS_HEADER_FLAGS_VOLUME) == 0) {
+                if ((header.dwFlags() & DdsConstants.DDSD_DEPTH) != DdsConstants.DDSD_DEPTH) {
                     return false;
-                } else if (Integer.compareUnsigned(arraySize, 1) > 0) {
+                } else if (arraySize != 1) {
                     return false;
                 }
             }

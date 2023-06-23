@@ -132,8 +132,8 @@ public class DdsImageReader extends ImageReader {
                 int xMax = Math.min(4, w - x);
                 for (int y_ = 0; y_ < yMax; y_++) {
                     for (int x_ = 0; x_ < xMax; x_++) {
-                        Rgba color = colorLookupBc1(colors, colorIndices, y_, x_).withAlpha(alphaLookupBc3(alphas,
-                                alphaIndices, y_, x_));
+                        Rgba color = colorLookupBc1(colors, colorIndices, y_, x_)
+                                .withAlpha(alphaLookupBc3(alphas, alphaIndices, y_, x_));
                         raster.setDataElements(x + x_, y + y_, new int[] { color.asA8R8G8B8() });
                     }
                 }
@@ -198,6 +198,10 @@ public class DdsImageReader extends ImageReader {
             // TODO: support dxgi format as well
             throw new UnsupportedOperationException("dxt10 header not supported");
         } else {
+            if (dds.header().isVolumeTexture()) {
+                throw new UnsupportedOperationException("volume textures not supported");
+            }
+
             D3dFormat d3dFormat = dds.d3dFormat();
             if (d3dFormat.isBlockCompressed()) {
                 switch (d3dFormat) {
