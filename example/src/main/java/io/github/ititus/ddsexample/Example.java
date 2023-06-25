@@ -4,11 +4,13 @@ import io.github.ititus.dds.DdsFile;
 
 import javax.imageio.ImageIO;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -21,12 +23,24 @@ public final class Example {
     private Example() {}
 
     public static void main(String[] args) throws Exception {
-        Path desktop = Path.of(System.getProperty("user.home"), "Desktop").toRealPath();
-        Path stellarisInstallDir = Path.of("C:/Program Files (x86)/Steam/steamapps/common/Stellaris").toRealPath();
+        var desktop = Path.of(System.getProperty("user.home"), "Desktop").toRealPath();
+        var out = desktop.resolve("pdx");
+        var steam = Path.of("C:/Program Files (x86)/Steam/steamapps/common").toRealPath();
+        var ck3InstallDir = steam.resolve("Crusader Kings III");
+        var eu4InstallDir = steam.resolve("Europa Universalis IV");
+        var vic3InstallDir = steam.resolve("Victoria III");
+        var hoi4InstallDir = steam.resolve("Hearts of Iron IV");
+        var stellarisInstallDir = steam.resolve("Stellaris");
 
-        // showInfoAndConvertToPng(desktop.resolve("ce_frame_circle.dds"));
-        showInfoAndConvertToPng(desktop.resolve("ce_dragon_bhutan.dds"), true);
-        // convertRecursive(stellarisInstallDir, desktop.resolve("pdx/dds_out"), "png");
+        // showInfoAndConvertToPng(desktop.resolve("ce_frame_circle.dds"), false);
+        // showInfoAndConvertToPng(desktop.resolve("ce_dragon_bhutan.dds"), false);
+        // showInfoAndConvertToPng(desktop.resolve("surround_tile.dds"), false);
+        // showInfoAndConvertToPng(desktop.resolve("placeholder_activity_background_bg.dds"), false);
+        // convertRecursive(stellarisInstallDir, out.resolve("dds_out"), "png", false);
+
+        showInfoRecursive(ck3InstallDir, out.resolve("dds_ck3.log"));
+        showInfoRecursive(eu4InstallDir, out.resolve("dds_eu4.log"));
+        showInfoRecursive(stellarisInstallDir, out.resolve("dds_stellaris.log"));
     }
 
     private static void showInfoAndConvertToPng(Path file, boolean all) throws Exception {
@@ -34,23 +48,65 @@ public final class Example {
         convertTo(file, null, "png", all);
     }
 
-    private static void convertRecursive(Path inDir, Path outDir, String formatName) throws Exception {
-        List<Path> files;
+    private static void doRecursive(Path inDir, Consumer<? super Path> action) throws Exception {
         try (Stream<Path> stream = Files.walk(inDir)) {
-            files = stream
+            stream
                     .filter(Files::isRegularFile)
                     .filter(DDS_FILE)
-                    .toList();
+                    .forEach(action);
         }
+    }
 
-        for (Path file : files) {
-            Path relativeDir = inDir.relativize(file.getParent());
-            Path outParentDir = outDir.resolve(relativeDir);
+    private static void showInfoRecursive(Path inDir) throws Exception {
+        showInfoRecursive(inDir, System.out);
+    }
+
+    private static void showInfoRecursive(Path inDir, Path logFile) throws Exception {
+        Files.createDirectories(logFile.getParent());
+        try (
+                var w = Files.newBufferedWriter(logFile, StandardOpenOption.WRITE, StandardOpenOption.CREATE,
+                        StandardOpenOption.TRUNCATE_EXISTING);
+                var pw = new PrintWriter(w)
+        ) {
+            showInfoRecursive(inDir, pw);
+        }
+    }
+
+    private static void showInfoRecursive(Path inDir, PrintWriter w) throws Exception {
+        doRecursive(inDir, file -> {
+            Path relative = inDir.relativize(file);
+            String relativeString = relative.toString().replace('\\', '/');
             try {
-                convertTo(file, outParentDir, formatName, true);
+                var dds = DdsFile.load(file);
+                w.println(relativeString + ": " + dds);
             } catch (Exception e) {
-                Path relative = inDir.relativize(file);
+                w.println(relativeString + ": load error | " + e);
+            }
+        });
+    }
 
+    private static void showInfoRecursive(Path inDir, PrintStream w) throws Exception {
+        doRecursive(inDir, file -> {
+            Path relative = inDir.relativize(file);
+            String relativeString = relative.toString().replace('\\', '/');
+            try {
+                var dds = DdsFile.load(file);
+                w.println(relativeString + ": " + dds);
+            } catch (Exception e) {
+                w.println(relativeString + ": load error | " + e);
+            }
+        });
+    }
+
+    private static void convertRecursive(Path inDir, Path outDir, String formatName, boolean all) throws Exception {
+        doRecursive(inDir, file -> {
+            Path relative = inDir.relativize(file);
+            Path relativeDir = relative.getParent();
+            Path outParentDir = outDir.resolve(relativeDir);
+
+            try {
+                convertTo(file, outParentDir, formatName, all);
+            } catch (Exception e) {
                 String msg;
                 try {
                     var dds = DdsFile.load(file);
@@ -59,9 +115,9 @@ public final class Example {
                     msg = "load error | " + e2;
                 }
 
-                System.out.println(relative + ": " + msg);
+                System.out.println(relative.toString().replace('\\', '/') + ": " + msg);
             }
-        }
+        });
     }
 
     private static void convertTo(Path in, Path outDir, String formatName, boolean all) throws IOException {

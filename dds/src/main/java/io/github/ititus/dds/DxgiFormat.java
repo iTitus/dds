@@ -111,7 +111,7 @@ public enum DxgiFormat implements PixelFormat {
     NV12(103),
     P010(104),
     P016(105),
-    DXGI_FORMAT_420_OPAQUE(106),
+    _420_OPAQUE(106),
     YUY2(107),
     Y210(108),
     Y216(109),
@@ -196,6 +196,8 @@ public enum DxgiFormat implements PixelFormat {
     public int getHorizontalPixelsPerBlock() {
         // TODO: implement
         return switch (this) {
+            case B8G8R8A8_UNORM -> 1;
+            case R8G8_B8G8_UNORM, G8R8_G8B8_UNORM, YUY2, Y210, Y216 -> 2;
             case BC1_TYPELESS, BC1_UNORM, BC1_UNORM_SRGB,
                     BC2_TYPELESS, BC2_UNORM, BC2_UNORM_SRGB,
                     BC3_TYPELESS, BC3_UNORM, BC3_UNORM_SRGB,
@@ -211,6 +213,7 @@ public enum DxgiFormat implements PixelFormat {
     public int getVerticalPixelsPerBlock() {
         // TODO: implement
         return switch (this) {
+            case B8G8R8A8_UNORM, R8G8_B8G8_UNORM, G8R8_G8B8_UNORM -> 1;
             case BC1_TYPELESS, BC1_UNORM, BC1_UNORM_SRGB,
                     BC2_TYPELESS, BC2_UNORM, BC2_UNORM_SRGB,
                     BC3_TYPELESS, BC3_UNORM, BC3_UNORM_SRGB,

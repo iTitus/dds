@@ -72,7 +72,13 @@ public record DdsFile(
     }
 
     public static DdsFile load(DataReader r) throws IOException {
-        int dwMagic = r.readDword();
+        int dwMagic;
+        try {
+            dwMagic = r.readDword();
+        } catch (EOFException e) {
+            throw new IOException("empty file", e);
+        }
+
         if (dwMagic != DDS_MAGIC) {
             throw new IOException("invalid dds magic");
         }

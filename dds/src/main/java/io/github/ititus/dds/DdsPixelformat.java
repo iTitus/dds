@@ -41,7 +41,7 @@ public record DdsPixelformat(
         if (dwSize != SIZE) {
             return false;
         } else {
-            return d3dFormat().getBitsPerPixel() != 0;
+            return shouldLoadHeader10() || d3dFormat().getBitsPerPixel() != 0;
         }
     }
 
