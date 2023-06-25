@@ -54,15 +54,15 @@ public final class DdsResource {
                         resources.add(load(r, currentHeight, currentWidth, arrayIndex, face, mipmap, z, size));
                     }
 
-                    if (currentHeight > 1) {
+                    if (Integer.compareUnsigned(currentHeight, 1) > 0) {
                         currentHeight = Integer.divideUnsigned(currentHeight, 2);
                     }
 
-                    if (currentWidth > 1) {
+                    if (Integer.compareUnsigned(currentWidth, 1) > 0) {
                         currentWidth = Integer.divideUnsigned(currentWidth, 2);
                     }
 
-                    if (currentDepth > 1) {
+                    if (Integer.compareUnsigned(currentDepth, 1) > 0) {
                         currentDepth = Integer.divideUnsigned(currentDepth, 2);
                     }
                 }
