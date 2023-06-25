@@ -25,7 +25,7 @@ subprojects {
     apply plugin: 'org.javamodularity.moduleplugin'
 
     group = 'io.github.ititus'
-    version = '3.0.0'
+    version = '3.0.1'
 
     java {
         toolchain {
