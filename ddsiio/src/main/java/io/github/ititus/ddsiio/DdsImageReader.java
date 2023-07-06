@@ -195,7 +195,13 @@ public class DdsImageReader extends ImageReader {
 
         int h = getHeight(imageIndex);
         int w = getWidth(imageIndex);
-        BufferedImage img = getDestination(param, getImageTypes(imageIndex), w, h);
+        Iterator<ImageTypeSpecifier> imageTypes;
+        try {
+            imageTypes = getImageTypes(imageIndex);
+        } catch (UnsupportedOperationException e) {
+            throw new IIOException("error while getting image type", e);
+        }
+        BufferedImage img = getDestination(param, imageTypes, w, h);
         WritableRaster raster = img.getRaster();
 
         PixelFormat format = dds.isDxt10() ? dds.dxgiFormat() : dds.d3dFormat();
@@ -207,12 +213,12 @@ public class DdsImageReader extends ImageReader {
             } else if (format == D3dFormat.DXT4 || format == D3dFormat.DXT5 || format == DxgiFormat.BC3_UNORM || format == DxgiFormat.BC3_UNORM_SRGB) {
                 bc3(h, w, raster, b);
             } else {
-                throw new RuntimeException("unsupported block compression: " + format);
+                throw new IIOException("unsupported block compression: " + format);
             }
         } else if (format.isPacked()) {
-            throw new RuntimeException("unsupported packed format: " + format);
+            throw new IIOException("unsupported packed format: " + format);
         } else if (format.isPlanar()) {
-            throw new RuntimeException("unsupported planar format: " + format);
+            throw new IIOException("unsupported planar format: " + format);
         } else {
             int bpp = format.getBitsPerPixel();
             for (int y = 0; Integer.compareUnsigned(y, h) < 0; y++) {
@@ -223,7 +229,7 @@ public class DdsImageReader extends ImageReader {
                         case 16 -> new short[] { b.getShort() };
                         case 24 -> new int[] { DdsHelper.read24(b) };
                         case 32 -> new int[] { b.getInt() };
-                        default -> throw new RuntimeException("unsupported bpp " + bpp + " for format: " + format);
+                        default -> throw new IIOException("unsupported bpp " + bpp + " for format: " + format);
                     };
                     raster.setDataElements(x, y, arr);
                 }
