@@ -209,6 +209,8 @@ public class DdsImageReader extends ImageReader {
             } else {
                 throw new RuntimeException("unsupported block compression: " + format);
             }
+        } else if (format.isPacked()) {
+            throw new RuntimeException("unsupported packed format: " + format);
         } else {
             int bpp = format.getBitsPerPixel();
             for (int y = 0; Integer.compareUnsigned(y, h) < 0; y++) {

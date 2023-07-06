@@ -55,6 +55,10 @@ public record DdsHeaderDxt10(
         return true;
     }
 
+    public boolean isAlphaPremultiplied() {
+        return (miscFlags2 & DdsConstants.DDS_ALPHA_MODE_PREMULTIPLIED) == DdsConstants.DDS_ALPHA_MODE_PREMULTIPLIED;
+    }
+
     @Override
     public String toString() {
         List<String> list = new ArrayList<>(5);

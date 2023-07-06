@@ -137,4 +137,20 @@ public enum D3dFormat implements PixelFormat {
             default -> 1;
         };
     }
+
+    @Override
+    public boolean isBlockCompressed() {
+        return switch (this) {
+            case DXT1, DXT2, DXT3, DXT4, DXT5 -> true;
+            default -> false;
+        };
+    }
+
+    @Override
+    public boolean isPacked() {
+        return switch (this) {
+            case R8G8_B8G8, G8R8_G8B8, UYVY, YUY2 -> true;
+            default -> false;
+        };
+    }
 }

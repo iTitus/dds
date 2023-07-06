@@ -12,7 +12,7 @@ import static io.github.ititus.dds.DdsConstants.*;
 
 public final class DdsIioHelper {
 
-    public static final int RGB_COLORSPACE = ColorSpace.CS_sRGB;
+    public static final int RGB_COLORSPACE = ColorSpace.CS_LINEAR_RGB;
 
     private DdsIioHelper() {}
 
@@ -110,7 +110,77 @@ public final class DdsIioHelper {
     }
 
     public static ImageTypeSpecifier imageType(DdsHeader header, DdsHeaderDxt10 header10) {
-        // TODO: support dxgi format as well
+        DxgiFormat format = header10.dxgiFormat();
+        switch (format) {
+            case R8G8B8A8_TYPELESS, R8G8B8A8_UNORM, R8G8B8A8_UNORM_SRGB, R8G8B8A8_UINT/*, R8G8B8A8_SNORM, R8G8B8A8_SINT*/ -> {
+                int cs = switch (format) {
+                    case R8G8B8A8_UNORM_SRGB -> ColorSpace.CS_sRGB;
+                    default -> ColorSpace.CS_LINEAR_RGB;
+                };
+                ColorModel cm = new DirectColorModel(
+                        ColorSpace.getInstance(cs),
+                        32,
+                        0x000000ff,
+                        0x0000ff00,
+                        0x00ff0000,
+                        0xff000000,
+                        header10.isAlphaPremultiplied(),
+                        DataBuffer.TYPE_INT
+                );
+                return new ImageTypeSpecifier(
+                        cm,
+                        cm.createCompatibleSampleModel(1, 1)
+                );
+            }
+            case B8G8R8A8_TYPELESS, B8G8R8A8_UNORM, B8G8R8A8_UNORM_SRGB,
+                    B8G8R8X8_TYPELESS, B8G8R8X8_UNORM, B8G8R8X8_UNORM_SRGB -> {
+                int cs = switch (format) {
+                    case B8G8R8A8_UNORM_SRGB, B8G8R8X8_UNORM_SRGB -> ColorSpace.CS_sRGB;
+                    default -> ColorSpace.CS_LINEAR_RGB;
+                };
+                int amask = switch (format) {
+                    case B8G8R8X8_TYPELESS, B8G8R8X8_UNORM, B8G8R8X8_UNORM_SRGB -> 0;
+                    default -> 0xff000000;
+                };
+                ColorModel cm = new DirectColorModel(
+                        ColorSpace.getInstance(cs),
+                        32,
+                        0x00ff0000,
+                        0x0000ff00,
+                        0x000000ff,
+                        amask,
+                        header10.isAlphaPremultiplied(),
+                        DataBuffer.TYPE_INT
+                );
+                return new ImageTypeSpecifier(
+                        cm,
+                        cm.createCompatibleSampleModel(1, 1)
+                );
+            }
+            case BC1_TYPELESS, BC1_UNORM, BC1_UNORM_SRGB,
+                    BC2_TYPELESS, BC2_UNORM, BC2_UNORM_SRGB,
+                    BC3_TYPELESS, BC3_UNORM, BC3_UNORM_SRGB -> {
+                int cs = switch (format) {
+                    case BC1_UNORM_SRGB, BC2_UNORM_SRGB, BC3_UNORM_SRGB -> ColorSpace.CS_sRGB;
+                    default -> ColorSpace.CS_LINEAR_RGB;
+                };
+                ColorModel cm = new DirectColorModel(
+                        ColorSpace.getInstance(cs),
+                        32,
+                        0x00ff0000,
+                        0x0000ff00,
+                        0x000000ff,
+                        0xff000000,
+                        header10.isAlphaPremultiplied(),
+                        DataBuffer.TYPE_INT
+                );
+                return new ImageTypeSpecifier(
+                        cm,
+                        cm.createCompatibleSampleModel(1, 1)
+                );
+            }
+        }
+
         throw new UnsupportedOperationException("unsupported format: " + header + " " + header10);
     }
 

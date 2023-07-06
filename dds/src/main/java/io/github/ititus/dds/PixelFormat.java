@@ -12,7 +12,7 @@ public sealed interface PixelFormat permits D3dFormat, DxgiFormat {
         return getBitsPerPixel() * getHorizontalPixelsPerBlock() * getVerticalPixelsPerBlock();
     }
 
-    default boolean isBlockCompressed() {
-        return getHorizontalPixelsPerBlock() > 1 || getVerticalPixelsPerBlock() > 1;
-    }
+    boolean isBlockCompressed();
+
+    boolean isPacked();
 }
