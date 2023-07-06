@@ -36,7 +36,8 @@ public final class Example {
         // showInfoAndConvertToPng(desktop.resolve("ce_dragon_bhutan.dds"), false);
         // showInfoAndConvertToPng(desktop.resolve("surround_tile.dds"), false);
         // showInfoAndConvertToPng(desktop.resolve("placeholder_activity_background_bg.dds"), false);
-        convertRecursive(stellarisInstallDir, out.resolve("dds_out"), "png", false);
+        showInfoAndConvertToPng(desktop.resolve("colony_settlement.dds"), false);
+        // convertRecursive(stellarisInstallDir, out.resolve("dds_out"), "png", false);
 
         // showInfoRecursive(ck3InstallDir, out.resolve("dds_ck3.log"));
         // showInfoRecursive(eu4InstallDir, out.resolve("dds_eu4.log"));

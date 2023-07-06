@@ -15,4 +15,6 @@ public sealed interface PixelFormat permits D3dFormat, DxgiFormat {
     boolean isBlockCompressed();
 
     boolean isPacked();
+
+    boolean isPlanar();
 }

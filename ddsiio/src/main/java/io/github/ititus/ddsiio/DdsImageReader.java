@@ -200,17 +200,19 @@ public class DdsImageReader extends ImageReader {
 
         PixelFormat format = dds.isDxt10() ? dds.dxgiFormat() : dds.d3dFormat();
         if (format.isBlockCompressed()) {
-            if (format == D3dFormat.DXT1 || format == DxgiFormat.BC1_TYPELESS || format == DxgiFormat.BC1_UNORM || format == DxgiFormat.BC1_UNORM_SRGB) {
+            if (format == D3dFormat.DXT1 || format == DxgiFormat.BC1_UNORM || format == DxgiFormat.BC1_UNORM_SRGB) {
                 bc1(h, w, raster, b);
-            } else if (format == D3dFormat.DXT2 || format == D3dFormat.DXT3 || format == DxgiFormat.BC2_TYPELESS || format == DxgiFormat.BC2_UNORM || format == DxgiFormat.BC2_UNORM_SRGB) {
+            } else if (format == D3dFormat.DXT2 || format == D3dFormat.DXT3 || format == DxgiFormat.BC2_UNORM || format == DxgiFormat.BC2_UNORM_SRGB) {
                 bc2(h, w, raster, b);
-            } else if (format == D3dFormat.DXT4 || format == D3dFormat.DXT5 || format == DxgiFormat.BC3_TYPELESS || format == DxgiFormat.BC3_UNORM || format == DxgiFormat.BC3_UNORM_SRGB) {
+            } else if (format == D3dFormat.DXT4 || format == D3dFormat.DXT5 || format == DxgiFormat.BC3_UNORM || format == DxgiFormat.BC3_UNORM_SRGB) {
                 bc3(h, w, raster, b);
             } else {
                 throw new RuntimeException("unsupported block compression: " + format);
             }
         } else if (format.isPacked()) {
             throw new RuntimeException("unsupported packed format: " + format);
+        } else if (format.isPlanar()) {
+            throw new RuntimeException("unsupported planar format: " + format);
         } else {
             int bpp = format.getBitsPerPixel();
             for (int y = 0; Integer.compareUnsigned(y, h) < 0; y++) {

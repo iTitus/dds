@@ -257,4 +257,13 @@ public enum DxgiFormat implements PixelFormat {
             default -> false;
         };
     }
+
+    @Override
+    public boolean isPlanar() {
+        return switch (this) {
+            case NV12, P010, P016, _420_OPAQUE, NV11,
+                    P208, V208, V408 -> true;
+            default -> false;
+        };
+    }
 }
