@@ -173,9 +173,10 @@ public enum DxgiFormat implements PixelFormat {
                     R32_TYPELESS, D32_FLOAT, R32_FLOAT, R32_UINT, R32_SINT, R24G8_TYPELESS,
                     D24_UNORM_S8_UINT, R24_UNORM_X8_TYPELESS, X24_TYPELESS_G8_UINT,
                     R9G9B9E5_SHAREDEXP,
-                    R8G8_B8G8_UNORM, G8R8_G8B8_UNORM, B8G8R8A8_UNORM, B8G8R8X8_UNORM,
+                    R8G8_B8G8_UNORM, G8R8_G8B8_UNORM,
                     R10G10B10_XR_BIAS_A2_UNORM,
-                    B8G8R8A8_TYPELESS, B8G8R8A8_UNORM_SRGB, B8G8R8X8_TYPELESS, B8G8R8X8_UNORM_SRGB -> 32;
+                    B8G8R8A8_TYPELESS, B8G8R8A8_UNORM, B8G8R8A8_UNORM_SRGB,
+                    B8G8R8X8_TYPELESS, B8G8R8X8_UNORM, B8G8R8X8_UNORM_SRGB -> 32;
             case R8G8_TYPELESS, R8G8_UNORM, R8G8_UINT, R8G8_SNORM, R8G8_SINT,
                     R16_TYPELESS, R16_FLOAT, D16_UNORM, R16_UNORM, R16_UINT, R16_SNORM, R16_SINT,
                     B5G6R5_UNORM, B5G5R5A1_UNORM, B4G4R4A4_UNORM -> 16;
@@ -196,7 +197,8 @@ public enum DxgiFormat implements PixelFormat {
     public int getHorizontalPixelsPerBlock() {
         // TODO: implement
         return switch (this) {
-            case B8G8R8A8_UNORM -> 1;
+            case B8G8R8A8_TYPELESS, B8G8R8A8_UNORM, B8G8R8A8_UNORM_SRGB,
+                    B8G8R8X8_TYPELESS, B8G8R8X8_UNORM, B8G8R8X8_UNORM_SRGB -> 1;
             case R8G8_B8G8_UNORM, G8R8_G8B8_UNORM, YUY2, Y210, Y216 -> 2;
             case BC1_TYPELESS, BC1_UNORM, BC1_UNORM_SRGB,
                     BC2_TYPELESS, BC2_UNORM, BC2_UNORM_SRGB,
@@ -213,7 +215,8 @@ public enum DxgiFormat implements PixelFormat {
     public int getVerticalPixelsPerBlock() {
         // TODO: implement
         return switch (this) {
-            case B8G8R8A8_UNORM, R8G8_B8G8_UNORM, G8R8_G8B8_UNORM -> 1;
+            case B8G8R8A8_TYPELESS, B8G8R8A8_UNORM, B8G8R8A8_UNORM_SRGB,
+                    B8G8R8X8_TYPELESS, B8G8R8X8_UNORM, B8G8R8X8_UNORM_SRGB -> 1;
             case BC1_TYPELESS, BC1_UNORM, BC1_UNORM_SRGB,
                     BC2_TYPELESS, BC2_UNORM, BC2_UNORM_SRGB,
                     BC3_TYPELESS, BC3_UNORM, BC3_UNORM_SRGB,

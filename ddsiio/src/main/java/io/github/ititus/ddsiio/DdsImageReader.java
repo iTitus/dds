@@ -2,6 +2,7 @@ package io.github.ititus.ddsiio;
 
 import io.github.ititus.dds.*;
 
+import javax.imageio.IIOException;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.ImageTypeSpecifier;
@@ -264,6 +265,10 @@ public class DdsImageReader extends ImageReader {
             return;
         }
 
-        dds = DdsFile.load(stream);
+        try {
+            dds = DdsFile.load(stream);
+        } catch (Exception e) {
+            throw new IIOException("error while loading dds file", e);
+        }
     }
 }
