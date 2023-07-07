@@ -194,8 +194,8 @@ public final class DdsIioHelper {
             return DataBuffer.TYPE_USHORT;
         } else if (bpp <= 32) {
             return DataBuffer.TYPE_INT;
+        } else {
+            throw new UnsupportedOperationException("cannot find best transfer type for bpp " + bpp);
         }
-
-        return DataBuffer.TYPE_UNDEFINED;
     }
 }

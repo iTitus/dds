@@ -204,7 +204,7 @@ public class DdsImageReader extends ImageReader {
         try {
             imageTypes = getImageTypes(imageIndex);
         } catch (UnsupportedOperationException e) {
-            throw new IIOException("error while getting image type", e);
+            throw new IIOException("error while getting image type from " + dds, e);
         }
         BufferedImage img = getDestination(param, imageTypes, w, h);
         WritableRaster raster = img.getRaster();
@@ -218,12 +218,12 @@ public class DdsImageReader extends ImageReader {
             } else if (format == D3dFormat.DXT4 || format == D3dFormat.DXT5 || format == DxgiFormat.BC3_UNORM || format == DxgiFormat.BC3_UNORM_SRGB) {
                 bc3(h, w, raster, b);
             } else {
-                throw new IIOException("unsupported block compression: " + format);
+                throw new IIOException("unsupported block compression " + format + " from " + dds);
             }
         } else if (format.isPacked()) {
-            throw new IIOException("unsupported packed format: " + format);
+            throw new IIOException("unsupported packed format " + format + " from " + dds);
         } else if (format.isPlanar()) {
-            throw new IIOException("unsupported planar format: " + format);
+            throw new IIOException("unsupported planar format " + format + " from " + dds);
         } else {
             int bpp = format.getBitsPerPixel();
             for (int y = 0; Integer.compareUnsigned(y, h) < 0; y++) {
@@ -234,7 +234,8 @@ public class DdsImageReader extends ImageReader {
                         case 16 -> new short[] { b.getShort() };
                         case 24 -> new int[] { DdsHelper.read24(b) };
                         case 32 -> new int[] { b.getInt() };
-                        default -> throw new IIOException("unsupported bpp " + bpp + " for format: " + format);
+                        default ->
+                                throw new IIOException("unsupported bpp " + bpp + " for format: " + format + " from " + dds);
                     };
                     raster.setDataElements(x, y, arr);
                 }
