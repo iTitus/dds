@@ -212,7 +212,8 @@ public enum DxgiFormat implements PixelFormat {
                     BC5_TYPELESS, BC5_UNORM, BC5_SNORM,
                     BC6H_TYPELESS, BC6H_UF16, BC6H_SF16,
                     BC7_TYPELESS, BC7_UNORM, BC7_UNORM_SRGB -> 4;
-            case NV12, P010, P016, _420_OPAQUE, NV11,
+            case UNKNOWN,
+                    NV12, P010, P016, _420_OPAQUE, NV11,
                     P208, V208, V408 ->
                     throw new IllegalStateException("unknown horizontal pixels per block for format " + this);
             default -> 1;
@@ -229,7 +230,8 @@ public enum DxgiFormat implements PixelFormat {
                     BC5_TYPELESS, BC5_UNORM, BC5_SNORM,
                     BC6H_TYPELESS, BC6H_UF16, BC6H_SF16,
                     BC7_TYPELESS, BC7_UNORM, BC7_UNORM_SRGB -> 4;
-            case NV12, P010, P016, _420_OPAQUE, NV11,
+            case UNKNOWN,
+                    NV12, P010, P016, _420_OPAQUE, NV11,
                     P208, V208, V408 ->
                     throw new IllegalStateException("unknown vertical pixels per block for format " + this);
             default -> 1;
