@@ -188,6 +188,11 @@ public class DdsImageReader extends ImageReader {
     @Override
     public BufferedImage read(int imageIndex, ImageReadParam param) throws IOException {
         loadAndCheckIndex(imageIndex);
+        clearAbortRequest();
+        processImageStarted(imageIndex);
+        if (param == null) {
+            param = getDefaultReadParam();
+        }
 
         DdsResource resource = dds.resources().get(imageIndex);
         ByteBuffer b = resource.getBuffer();
@@ -236,6 +241,7 @@ public class DdsImageReader extends ImageReader {
             }
         }
 
+        processImageComplete();
         return img;
     }
 
