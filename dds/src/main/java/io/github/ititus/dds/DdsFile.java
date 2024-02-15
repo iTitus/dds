@@ -35,14 +35,16 @@ public record DdsFile(
             @Override
             public void read(ByteBuffer target, int size) throws IOException {
                 if (target.hasArray()) {
-                    if (is.readNBytes(target.array(), target.arrayOffset() + target.position(), size) != size) {
-                        throw new EOFException();
+                    int read = is.readNBytes(target.array(), target.arrayOffset() + target.position(), size);
+                    if (read != size) {
+                        throw new EOFException("expected=" + size + " actual=" + read);
                     }
                     target.position(target.position() + size);
                 } else {
                     byte[] arr = new byte[size];
-                    if (is.readNBytes(arr, 0, size) != size) {
-                        throw new EOFException();
+                    int read = is.readNBytes(arr, 0, size);
+                    if (read != size) {
+                        throw new EOFException("expected=" + size + " actual=" + read);
                     }
                     target.put(arr, 0, size);
                 }
