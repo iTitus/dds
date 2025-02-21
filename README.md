@@ -15,7 +15,7 @@ Targets:
 - Java `BufferedImage` (`ddsiio` module)
 - JavaFX `Image` (`ddsfx` module)
 
-Currently targeting Java 17+ and JavaFX 19+.
+Currently targeting Java 21+ and JavaFX 21+.
 
 ## dds
 

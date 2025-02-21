@@ -7,7 +7,7 @@ dependencies {
 }
 
 javafx {
-    version = '20'
+    version = '21.0.6'
     modules = ['javafx.graphics']
     configurations = ['compileOnly', 'testImplementation']
 }
