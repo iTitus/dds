@@ -1,51 +1,21 @@
 plugins {
-    id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
+    id 'com.vanniktech.maven.publish' version '0.34.0' apply false
     id 'org.openjfx.javafxplugin' version '0.1.0' apply false
-    id 'org.javamodularity.moduleplugin' version '1.8.15' apply false
-}
-
-nexusPublishing {
-    connectTimeout = clientTimeout = Duration.ofHours(2)
-    repositories {
-        sonatype {
-            stagingProfileId = project.findProperty('ossrh_staging_profile_id')
-            username = project.findProperty('ossrh_username')
-            password = project.findProperty('ossrh_password')
-        }
-    }
 }
 
 subprojects {
     apply plugin: 'java-library'
-    apply plugin: 'java-library-distribution'
-    apply plugin: 'idea'
-    apply plugin: 'eclipse'
-    apply plugin: 'maven-publish'
-    apply plugin: 'signing'
-    apply plugin: 'org.javamodularity.moduleplugin'
+    apply plugin: 'com.vanniktech.maven.publish'
 
     group = 'io.github.ititus'
-    version = '3.1.0'
+    version = '3.2.0-SNAPSHOT'
 
-    java {
-        toolchain {
-            languageVersion = JavaLanguageVersion.of(21)
-        }
-
-        withSourcesJar()
-        withJavadocJar()
-    }
-
-    modularity {
-        improveEclipseClasspathFile()
-        // disableEffectiveArgumentsAdjustment()
-    }
-
-    tasks.withType(JavaCompile) {
+    tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'
+        options.release = 21
     }
 
-    tasks.withType(Test) {
+    tasks.withType(Test).configureEach {
         systemProperty 'file.encoding', 'UTF-8'
     }
 
@@ -71,7 +41,17 @@ subprojects {
     test {
         useJUnitPlatform()
         testLogging {
-            events 'PASSED', 'FAILED', 'SKIPPED'
+            events 'passed', 'skipped', 'failed'
+        }
+    }
+
+    tasks.register('publishSnapshotToMavenCentral') {
+        if (version.endsWith('-SNAPSHOT')) {
+            dependsOn publishToMavenCentral
+        }
+    }.configure {
+        onlyIf('SNAPSHOT version') {
+            version.endsWith('-SNAPSHOT')
         }
     }
 }

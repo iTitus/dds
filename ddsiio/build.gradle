@@ -2,43 +2,32 @@ dependencies {
     api project(':dds')
 }
 
-publishing {
-    publications {
-        MyPublication(MavenPublication) {
-            pom {
-                name = 'DDS IIO Reader'
-                packaging = 'jar'
-                description = 'DDS Image Library for ImageIO'
-                url = 'https://github.com/iTitus/dds'
-                licenses {
-                    license {
-                        name = 'MIT License'
-                        url = 'https://mit-license.org'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'iTitus'
-                        name = 'iTitus'
-                        email = 'ititus@users.noreply.github.com'
-                    }
-                }
-                scm {
-                    connection = 'scm:git:git://github.com/iTitus/dds.git'
-                    developerConnection = 'scm:git:ssh://git@github.com:iTitus/dds.git'
-                    url = 'https://github.com/iTitus/dds'
-                    tag = "v${version}"
-                }
-            }
+mavenPublishing {
+    publishToMavenCentral(true)
+    signAllPublications()
 
-            from components.java
+    pom {
+        name = 'DDS IIO Reader'
+        description = 'DDS Image Library for ImageIO'
+        url = 'https://github.com/iTitus/dds'
+        licenses {
+            license {
+                name = 'MIT License'
+                url = 'https://mit-license.org'
+            }
+        }
+        developers {
+            developer {
+                id = 'iTitus'
+                name = 'iTitus'
+                email = 'ititus@users.noreply.github.com'
+            }
+        }
+        scm {
+            connection = 'scm:git:git://github.com/iTitus/dds.git'
+            developerConnection = 'scm:git:ssh://git@github.com:iTitus/dds.git'
+            url = 'https://github.com/iTitus/dds'
+            tag = "v${version}"
         }
     }
-}
-
-signing {
-    def signingKey = findProperty('signing_key')
-    def signingPassword = findProperty('signing_password')
-    useInMemoryPgpKeys(signingKey, signingPassword)
-    sign publishing.publications.MyPublication
 }
