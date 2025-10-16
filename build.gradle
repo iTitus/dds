@@ -3,6 +3,18 @@ plugins {
     id 'org.openjfx.javafxplugin' version '0.1.0' apply false
 }
 
+allprojects {
+    tasks.register('publishSnapshotToMavenCentral') {
+        if (version.endsWith('-SNAPSHOT') && tasks.findByName('publishToMavenCentral')) {
+            dependsOn publishToMavenCentral
+        }
+    }.configure {
+        onlyIf('SNAPSHOT version') {
+            version.endsWith('-SNAPSHOT') && tasks.findByName('publishToMavenCentral')
+        }
+    }
+}
+
 subprojects {
     apply plugin: 'java-library'
     apply plugin: 'com.vanniktech.maven.publish'
@@ -42,18 +54,6 @@ subprojects {
         useJUnitPlatform()
         testLogging {
             events 'passed', 'skipped', 'failed'
-        }
-    }
-
-    if (tasks.findByName('publishToMavenCentral')) {
-        tasks.register('publishSnapshotToMavenCentral') {
-            if (version.endsWith('-SNAPSHOT')) {
-                dependsOn publishToMavenCentral
-            }
-        }.configure {
-            onlyIf('SNAPSHOT version') {
-                version.endsWith('-SNAPSHOT')
-            }
         }
     }
 }
