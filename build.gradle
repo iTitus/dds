@@ -45,13 +45,15 @@ subprojects {
         }
     }
 
-    tasks.register('publishSnapshotToMavenCentral') {
-        if (version.endsWith('-SNAPSHOT')) {
-            dependsOn publishToMavenCentral
-        }
-    }.configure {
-        onlyIf('SNAPSHOT version') {
-            version.endsWith('-SNAPSHOT')
+    if (tasks.findByName('publishToMavenCentral')) {
+        tasks.register('publishSnapshotToMavenCentral') {
+            if (version.endsWith('-SNAPSHOT')) {
+                dependsOn publishToMavenCentral
+            }
+        }.configure {
+            onlyIf('SNAPSHOT version') {
+                version.endsWith('-SNAPSHOT')
+            }
         }
     }
 }
