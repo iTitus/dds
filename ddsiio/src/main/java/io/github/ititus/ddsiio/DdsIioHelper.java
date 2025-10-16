@@ -157,12 +157,14 @@ public final class DdsIioHelper {
                 );
             }
             case BC1_UNORM, BC1_UNORM_SRGB,
-                    BC2_UNORM, BC2_UNORM_SRGB,
-                    BC3_UNORM, BC3_UNORM_SRGB -> {
+                 BC2_UNORM, BC2_UNORM_SRGB,
+                 BC3_UNORM, BC3_UNORM_SRGB,
+                 BC7_UNORM, BC7_UNORM_SRGB -> {
                 int cs = switch (format) {
-                    case BC1_UNORM_SRGB, BC2_UNORM_SRGB, BC3_UNORM_SRGB -> ColorSpace.CS_sRGB;
+                    case BC1_UNORM_SRGB, BC2_UNORM_SRGB, BC3_UNORM_SRGB, BC7_UNORM_SRGB -> ColorSpace.CS_sRGB;
                     default -> ColorSpace.CS_LINEAR_RGB;
                 };
+                // technically BC7 can have no alpha per compression block, but we ignore that
                 ColorModel cm = new DirectColorModel(
                         ColorSpace.getInstance(cs),
                         32,
