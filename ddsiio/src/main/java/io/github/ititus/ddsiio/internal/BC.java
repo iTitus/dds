@@ -39,6 +39,7 @@ public final class BC {
         }
     }
 
+    @FunctionalInterface
     public interface BlockDecoder {
 
         void decode(ByteBuffer in, Rgba[] out);
