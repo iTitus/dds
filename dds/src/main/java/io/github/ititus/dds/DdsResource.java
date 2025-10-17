@@ -2,6 +2,7 @@ package io.github.ititus.dds;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,8 +16,7 @@ public final class DdsResource {
     private final int zLevel;
     private final ByteBuffer buffer;
 
-    private DdsResource(int height, int width, int arrayIndex, int faceIndex, int mipmapLevel, int zLevel,
-                        ByteBuffer buffer) {
+    private DdsResource(int height, int width, int arrayIndex, int faceIndex, int mipmapLevel, int zLevel, ByteBuffer buffer) {
         this.height = height;
         this.width = width;
         this.arrayIndex = arrayIndex;
@@ -72,8 +72,7 @@ public final class DdsResource {
         return List.copyOf(resources);
     }
 
-    public static DdsResource load(DataReader r, int height, int width, int arrayIndex, int faceIndex,
-                                   int mipmapLevel, int zLevel, int size) throws IOException {
+    public static DdsResource load(DataReader r, int height, int width, int arrayIndex, int faceIndex, int mipmapLevel, int zLevel, int size) throws IOException {
         ByteBuffer buf = ByteBuffer.allocate(size);
         r.read(buf, size);
         buf.flip();
@@ -104,8 +103,11 @@ public final class DdsResource {
         return zLevel;
     }
 
+    /**
+     * @return little-endian view of the actual data
+     */
     public ByteBuffer getBuffer() {
-        return buffer.duplicate();
+        return buffer.asReadOnlyBuffer().order(ByteOrder.LITTLE_ENDIAN);
     }
 
     @Override

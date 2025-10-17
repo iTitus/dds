@@ -1,6 +1,11 @@
 package io.github.ititus.ddsiio;
 
-import io.github.ititus.dds.*;
+import io.github.ititus.dds.DdsFile;
+import io.github.ititus.dds.DdsHelper;
+import io.github.ititus.dds.DdsResource;
+import io.github.ititus.dds.PixelFormat;
+import io.github.ititus.ddsiio.internal.BC;
+import io.github.ititus.ddsiio.internal.Util;
 
 import javax.imageio.IIOException;
 import javax.imageio.ImageReadParam;
@@ -25,126 +30,6 @@ public class DdsImageReader extends ImageReader {
         super(originator);
     }
 
-    private static void loadColorsBc1(ByteBuffer b, Rgba[] colors, byte[] colorIndices, boolean oneBitAlpha) {
-        short rawC0 = b.getShort();
-        short rawC1 = b.getShort();
-        b.get(colorIndices, 0, 4);
-
-        var c0 = Rgba.fromR5G6B5(rawC0);
-        var c1 = Rgba.fromR5G6B5(rawC1);
-        colors[0] = c0;
-        colors[1] = c1;
-        if (!oneBitAlpha || Short.compareUnsigned(rawC0, rawC1) > 0) {
-            colors[2] = c0.lerp(c1, 2, 1);
-            colors[3] = c0.lerp(c1, 1, 2);
-        } else {
-            colors[2] = c0.lerp(c1, 1, 1);
-            colors[3] = Rgba.TRANSPARENT;
-        }
-    }
-
-    private static Rgba colorLookupBc1(Rgba[] colors, byte[] colorIndices, int y, int x) {
-        int colorIndex = (Byte.toUnsignedInt(colorIndices[y]) >>> (2 * x)) & 0x3;
-        return colors[colorIndex];
-    }
-
-    private static byte alphaLookupBc2(byte[] alphas, int y, int x) {
-        int alpha = (alphas[(y << 1) | (x >>> 1)] >>> (4 * (x & 0x1))) & 0xf;
-        return (byte) (alpha * 17);
-    }
-
-    private static void loadAlphaBc3(ByteBuffer b, byte[] alphas, int[] alphaIndices) {
-        byte rawA0 = b.get();
-        byte rawA1 = b.get();
-        alphaIndices[0] = DdsHelper.read24(b);
-        alphaIndices[1] = DdsHelper.read24(b);
-
-        int a0 = Byte.toUnsignedInt(rawA0);
-        int a1 = Byte.toUnsignedInt(rawA1);
-
-        alphas[0] = rawA0;
-        alphas[1] = rawA1;
-        if (Byte.compareUnsigned(rawA0, rawA1) > 0) {
-            for (int i = 1; i <= 6; i++) {
-                alphas[i + 1] = (byte) (((7 - i) * a0 + i * a1) / 7);
-            }
-        } else {
-            for (int i = 1; i <= 4; i++) {
-                alphas[i + 1] = (byte) (((5 - i) * a0 + i * a1) / 5);
-            }
-            alphas[6] = 0;
-            alphas[7] = (byte) 255;
-        }
-    }
-
-    private static byte alphaLookupBc3(byte[] alphas, int[] alphaIndices, int y, int x) {
-        int alphaIndex = (alphaIndices[y >>> 1] >>> (3 * (((y & 0x1) << 2) | x))) & 0x7;
-        return alphas[alphaIndex];
-    }
-
-    private static void bc1(int h, int w, WritableRaster raster, ByteBuffer b) {
-        var colors = new Rgba[4];
-        var colorIndices = new byte[4];
-        for (int y = 0; Integer.compareUnsigned(y, h) < 0; y += 4) {
-            for (int x = 0; Integer.compareUnsigned(x, w) < 0; x += 4) {
-                loadColorsBc1(b, colors, colorIndices, true);
-
-                int yMax = Math.min(4, h - y);
-                int xMax = Math.min(4, w - x);
-                for (int y_ = 0; y_ < yMax; y_++) {
-                    for (int x_ = 0; x_ < xMax; x_++) {
-                        var color = colorLookupBc1(colors, colorIndices, y_, x_);
-                        raster.setDataElements(x + x_, y + y_, new int[] { color.asA8R8G8B8() });
-                    }
-                }
-            }
-        }
-    }
-
-    private static void bc2(int h, int w, WritableRaster raster, ByteBuffer b) {
-        var alphas = new byte[8];
-        var colors = new Rgba[4];
-        var colorIndices = new byte[4];
-        for (int y = 0; Integer.compareUnsigned(y, h) < 0; y += 4) {
-            for (int x = 0; Integer.compareUnsigned(x, w) < 0; x += 4) {
-                b.get(alphas, 0, 8);
-                loadColorsBc1(b, colors, colorIndices, false);
-
-                int yMax = Math.min(4, h - y);
-                int xMax = Math.min(4, w - x);
-                for (int y_ = 0; y_ < yMax; y_++) {
-                    for (int x_ = 0; x_ < xMax; x_++) {
-                        var alpha = alphaLookupBc2(alphas, y_, x_);
-                        var color = colorLookupBc1(colors, colorIndices, y_, x_).withAlpha(alpha);
-                        raster.setDataElements(x + x_, y + y_, new int[] { color.asA8R8G8B8() });
-                    }
-                }
-            }
-        }
-    }
-
-    private static void bc3(int h, int w, WritableRaster raster, ByteBuffer b) {
-        var alphas = new byte[8];
-        var alphaIndices = new int[2];
-        var colors = new Rgba[4];
-        var colorIndices = new byte[4];
-        for (int y = 0; Integer.compareUnsigned(y, h) < 0; y += 4) {
-            for (int x = 0; Integer.compareUnsigned(x, w) < 0; x += 4) {
-                loadAlphaBc3(b, alphas, alphaIndices);
-                loadColorsBc1(b, colors, colorIndices, false);
-
-                int yMax = Math.min(4, h - y);
-                int xMax = Math.min(4, w - x);
-                for (int y_ = 0; y_ < yMax; y_++) {
-                    for (int x_ = 0; x_ < xMax; x_++) {
-                        var alpha = alphaLookupBc3(alphas, alphaIndices, y_, x_);
-                        var color = colorLookupBc1(colors, colorIndices, y_, x_).withAlpha(alpha);
-                        raster.setDataElements(x + x_, y + y_, new int[] { color.asA8R8G8B8() });
-                    }
-                }
-            }
-        }
-    }
 
     @Override
     public int getNumImages(boolean allowSearch) throws IOException {
@@ -171,7 +56,7 @@ public class DdsImageReader extends ImageReader {
     @Override
     public Iterator<ImageTypeSpecifier> getImageTypes(int imageIndex) throws IOException {
         loadAndCheckIndex(imageIndex);
-        return List.of(DdsIioHelper.imageType(dds)).iterator();
+        return List.of(Util.imageType(dds)).iterator();
     }
 
     @Override
@@ -209,33 +94,32 @@ public class DdsImageReader extends ImageReader {
         BufferedImage img = getDestination(param, imageTypes, w, h);
         WritableRaster raster = img.getRaster();
 
-        PixelFormat format = dds.isDxt10() ? dds.dxgiFormat() : dds.d3dFormat();
-        if (format.isBlockCompressed()) {
-            switch (format) {
-                case D3dFormat.DXT1, DxgiFormat.BC1_UNORM, DxgiFormat.BC1_UNORM_SRGB -> bc1(h, w, raster, b);
-                case D3dFormat.DXT2, D3dFormat.DXT3, DxgiFormat.BC2_UNORM, DxgiFormat.BC2_UNORM_SRGB -> bc2(h, w, raster, b);
-                case D3dFormat.DXT4, D3dFormat.DXT5, DxgiFormat.BC3_UNORM, DxgiFormat.BC3_UNORM_SRGB -> bc3(h, w, raster, b);
-                default -> throw new IIOException("unsupported block compression " + format + " from " + dds);
-            }
-        } else if (format.isPacked()) {
-            throw new IIOException("unsupported packed format " + format + " from " + dds);
-        } else if (format.isPlanar()) {
-            throw new IIOException("unsupported planar format " + format + " from " + dds);
-        } else {
-            int bpp = format.getBitsPerPixel();
-            for (int y = 0; Integer.compareUnsigned(y, h) < 0; y++) {
-                for (int x = 0; Integer.compareUnsigned(x, w) < 0; x++) {
-                    // TODO: support other bpp
-                    Object arr = switch (bpp) {
-                        case 8 -> new byte[] { b.get() };
-                        case 16 -> new short[] { b.getShort() };
-                        case 24 -> new int[] { DdsHelper.read24(b) };
-                        case 32 -> new int[] { b.getInt() };
-                        default -> throw new IIOException("unsupported bpp " + bpp + " for format: " + format + " from " + dds);
-                    };
-                    raster.setDataElements(x, y, arr);
+        try {
+            PixelFormat format = dds.isDxt10() ? dds.dxgiFormat() : dds.d3dFormat();
+            if (format.isBlockCompressed()) {
+                BC.decode(h, w, raster, b, format);
+            } else if (format.isPacked()) {
+                throw new UnsupportedOperationException("unsupported packed format " + format);
+            } else if (format.isPlanar()) {
+                throw new UnsupportedOperationException("unsupported planar format " + format);
+            } else {
+                int bpp = format.getBitsPerPixel();
+                for (int y = 0; Integer.compareUnsigned(y, h) < 0; y++) {
+                    for (int x = 0; Integer.compareUnsigned(x, w) < 0; x++) {
+                        // TODO: support other bpp
+                        Object arr = switch (bpp) {
+                            case 8 -> new byte[] { b.get() };
+                            case 16 -> new short[] { b.getShort() };
+                            case 24 -> new int[] { DdsHelper.read24(b) };
+                            case 32 -> new int[] { b.getInt() };
+                            default -> throw new UnsupportedOperationException("unsupported bpp " + bpp + " from format " + format);
+                        };
+                        raster.setDataElements(x, y, arr);
+                    }
                 }
             }
+        } catch (Exception e) {
+            throw new IIOException("error while processing image " + dds, e);
         }
 
         processImageComplete();

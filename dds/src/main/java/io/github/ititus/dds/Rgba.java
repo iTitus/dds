@@ -15,11 +15,12 @@ public record Rgba(byte a, byte r, byte g, byte b) {
         int r = (color >>> 11) & 0x1f;
         int g = (color >>> 5) & 0x3f;
         int b = color & 0x1f;
+        // exact multiplications would be 255/31 ≈ 8.2258 and 255/63 ≈ 4.0476 respectively
         return new Rgba(
                 (byte) 255,
-                (byte) ((r << 3) | (r >>> 2)),
-                (byte) ((g << 2) | (g >>> 4)),
-                (byte) ((b << 3) | (b >>> 2))
+                (byte) ((r << 3) | (r >>> 2)), // equivalent to r * 8.25
+                (byte) ((g << 2) | (g >>> 4)), // equivalent to g * 4.0625
+                (byte) ((b << 3) | (b >>> 2))  // equivalent to b * 8.25
         );
     }
 
@@ -52,10 +53,10 @@ public record Rgba(byte a, byte r, byte g, byte b) {
 
         int n = n1 + n2;
         return new Rgba(
-                (byte) ((n1 * this.a8() + n2 * target.a8()) / n),
-                (byte) ((n1 * this.r8() + n2 * target.r8()) / n),
-                (byte) ((n1 * this.g8() + n2 * target.g8()) / n),
-                (byte) ((n1 * this.b8() + n2 * target.b8()) / n)
+                (byte) ((n1 * this.a8() + n2 * target.a8() + n / 2) / n),
+                (byte) ((n1 * this.r8() + n2 * target.r8() + n / 2) / n),
+                (byte) ((n1 * this.g8() + n2 * target.g8() + n / 2) / n),
+                (byte) ((n1 * this.b8() + n2 * target.b8() + n / 2) / n)
         );
     }
 
@@ -65,6 +66,30 @@ public record Rgba(byte a, byte r, byte g, byte b) {
         }
 
         return new Rgba(a, this.r(), this.g(), this.b());
+    }
+
+    public Rgba withRed(byte r) {
+        if (this.r() == r) {
+            return this;
+        }
+
+        return new Rgba(this.a(), r, this.g(), this.b());
+    }
+
+    public Rgba withGreen(byte g) {
+        if (this.g() == g) {
+            return this;
+        }
+
+        return new Rgba(this.a(), this.r(), g, this.b());
+    }
+
+    public Rgba withBlue(byte b) {
+        if (this.b() == b) {
+            return this;
+        }
+
+        return new Rgba(this.a(), this.r(), this.g(), b);
     }
 
     public int a8() {

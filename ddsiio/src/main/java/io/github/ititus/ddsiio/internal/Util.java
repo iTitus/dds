@@ -1,4 +1,4 @@
-package io.github.ititus.ddsiio;
+package io.github.ititus.ddsiio.internal;
 
 import io.github.ititus.dds.*;
 
@@ -10,11 +10,11 @@ import java.awt.image.DirectColorModel;
 
 import static io.github.ititus.dds.DdsConstants.*;
 
-public final class DdsIioHelper {
+public final class Util {
 
     public static final int RGB_COLORSPACE = ColorSpace.CS_LINEAR_RGB;
 
-    private DdsIioHelper() {}
+    private Util() {}
 
     public static ImageTypeSpecifier imageType(DdsFile file) {
         if (file.isDxt10()) {
@@ -164,7 +164,7 @@ public final class DdsIioHelper {
                     case BC1_UNORM_SRGB, BC2_UNORM_SRGB, BC3_UNORM_SRGB, BC7_UNORM_SRGB -> ColorSpace.CS_sRGB;
                     default -> ColorSpace.CS_LINEAR_RGB;
                 };
-                // technically BC7 can have no alpha per compression block, but we ignore that
+                // technically BC7 can have no alpha per compression block, but we ignore that here
                 ColorModel cm = new DirectColorModel(
                         ColorSpace.getInstance(cs),
                         32,

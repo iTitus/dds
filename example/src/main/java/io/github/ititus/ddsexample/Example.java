@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 public final class Example {
 
-    private static final Predicate<Path> DDS_FILE =
+    static final Predicate<Path> DDS_FILE =
             file -> Files.isRegularFile(file)
                     && file.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".dds");
 
@@ -24,27 +24,30 @@ public final class Example {
 
     public static void main(String[] args) throws Exception {
         var desktop = Path.of(System.getProperty("user.home"), "Desktop").toRealPath();
-        var out = desktop.resolve("pdx");
+        /*var out = desktop.resolve("pdx");
         var steam = Path.of("C:/Program Files (x86)/Steam/steamapps/common").toRealPath();
         var ck3InstallDir = steam.resolve("Crusader Kings III");
         var eu4InstallDir = steam.resolve("Europa Universalis IV");
         var vic3InstallDir = steam.resolve("Victoria III");
         var hoi4InstallDir = steam.resolve("Hearts of Iron IV");
-        var stellarisInstallDir = steam.resolve("Stellaris");
+        var stellarisInstallDir = steam.resolve("Stellaris");*/
 
         // showInfoAndConvertToPng(desktop.resolve("ce_frame_circle.dds"), false);
         // showInfoAndConvertToPng(desktop.resolve("ce_dragon_bhutan.dds"), false);
         // showInfoAndConvertToPng(desktop.resolve("surround_tile.dds"), false);
         // showInfoAndConvertToPng(desktop.resolve("placeholder_activity_background_bg.dds"), false);
-        showInfoAndConvertToPng(desktop.resolve("colony_settlement.dds"), false);
+        // showInfoAndConvertToPng(desktop.resolve("colony_settlement.dds"), false);
         // convertRecursive(stellarisInstallDir, out.resolve("dds_out"), "png", false);
 
         // showInfoRecursive(ck3InstallDir, out.resolve("dds_ck3.log"));
         // showInfoRecursive(eu4InstallDir, out.resolve("dds_eu4.log"));
         // showInfoRecursive(stellarisInstallDir, out.resolve("dds_stellaris.log"));
+
+        showInfoRecursive(desktop.resolve("DirectXTex"));
+        convertRecursive(desktop.resolve("DirectXTex"), desktop.resolve("out"), "png", false);
     }
 
-    private static void showInfoAndConvertToPng(Path file, boolean all) throws Exception {
+    static void showInfoAndConvertToPng(Path file, boolean all) throws Exception {
         showInfo(file);
         convertTo(file, null, "png", all);
     }
@@ -58,11 +61,11 @@ public final class Example {
         }
     }
 
-    private static void showInfoRecursive(Path inDir) throws Exception {
+    static void showInfoRecursive(Path inDir) throws Exception {
         showInfoRecursive(inDir, System.out);
     }
 
-    private static void showInfoRecursive(Path inDir, Path logFile) throws Exception {
+    static void showInfoRecursive(Path inDir, Path logFile) throws Exception {
         Files.createDirectories(logFile.getParent());
         try (
                 var w = Files.newBufferedWriter(logFile, StandardOpenOption.WRITE, StandardOpenOption.CREATE,
@@ -73,7 +76,7 @@ public final class Example {
         }
     }
 
-    private static void showInfoRecursive(Path inDir, PrintWriter w) throws Exception {
+    static void showInfoRecursive(Path inDir, PrintWriter w) throws Exception {
         doRecursive(inDir, file -> {
             Path relative = inDir.relativize(file);
             String relativeString = relative.toString().replace('\\', '/');
@@ -86,7 +89,7 @@ public final class Example {
         });
     }
 
-    private static void showInfoRecursive(Path inDir, PrintStream w) throws Exception {
+    static void showInfoRecursive(Path inDir, PrintStream w) throws Exception {
         doRecursive(inDir, file -> {
             Path relative = inDir.relativize(file);
             String relativeString = relative.toString().replace('\\', '/');
@@ -99,11 +102,11 @@ public final class Example {
         });
     }
 
-    private static void convertRecursive(Path inDir, Path outDir, String formatName, boolean all) throws Exception {
+    static void convertRecursive(Path inDir, Path outDir, String formatName, boolean all) throws Exception {
         doRecursive(inDir, file -> {
             Path relative = inDir.relativize(file);
             Path relativeDir = relative.getParent();
-            Path outParentDir = outDir.resolve(relativeDir);
+            Path outParentDir = relativeDir != null ? outDir.resolve(relativeDir) : outDir;
 
             try {
                 convertTo(file, outParentDir, formatName, all);
@@ -111,9 +114,10 @@ public final class Example {
                 String msg;
                 try {
                     var dds = DdsFile.load(file);
-                    msg = "conversion error: " + dds + " | " + e;
+                    msg = "conversion error: " + dds + " | " + e + " | cause=" + e.getCause();
                 } catch (Exception e2) {
-                    msg = "load error | " + e2;
+                    e2.addSuppressed(e);
+                    msg = "load error | " + e2 + " | cause=" + e2.getCause();
                 }
 
                 System.out.println(relative.toString().replace('\\', '/') + ": " + msg);
@@ -121,11 +125,11 @@ public final class Example {
         });
     }
 
-    private static void convertTo(Path in, Path outDir, String formatName, boolean all) throws IOException {
+    static void convertTo(Path in, Path outDir, String formatName, boolean all) throws IOException {
         convertTo(in, outDir, formatName, formatName.toLowerCase(Locale.ROOT), all);
     }
 
-    private static void convertTo(Path in, Path outDir, String formatName, String fileExtension, boolean all) throws IOException {
+    static void convertTo(Path in, Path outDir, String formatName, String fileExtension, boolean all) throws IOException {
         in = in.toRealPath();
         if (!Files.isRegularFile(in)) {
             throw new IllegalArgumentException("invalid input path");
@@ -225,7 +229,7 @@ public final class Example {
         }
     }
 
-    private static void showInfo(Path in) throws Exception {
+    static void showInfo(Path in) throws Exception {
         var dds = DdsFile.load(in);
         System.out.println(dds);
     }
