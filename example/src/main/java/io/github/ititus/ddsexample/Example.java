@@ -43,8 +43,8 @@ public final class Example {
         // showInfoRecursive(eu4InstallDir, out.resolve("dds_eu4.log"));
         // showInfoRecursive(stellarisInstallDir, out.resolve("dds_stellaris.log"));
 
-        showInfoRecursive(desktop.resolve("DirectXTex"));
-        convertRecursive(desktop.resolve("DirectXTex"), desktop.resolve("out"), "png", false);
+        showInfoRecursive(desktop.resolve("in"));
+        convertRecursive(desktop.resolve("in"), desktop.resolve("out"), "png", false);
     }
 
     static void showInfoAndConvertToPng(Path file, boolean all) throws Exception {
