@@ -1,7 +1,5 @@
 package io.github.ititus.ddsiio.internal;
 
-import io.github.ititus.dds.Rgba;
-
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -9,7 +7,7 @@ public final class BC7 {
 
     public static final BC.BlockDecoder DECODER = BC7::decode;
 
-    private static void decode(ByteBuffer in, Rgba[] out) {
+    private static void decode(ByteBuffer in, int[] out) {
         byte[] data = new byte[16];
         in.get(data);
         BitReader reader = new BitReader(data);
@@ -28,12 +26,12 @@ public final class BC7 {
             case 5 -> _decodeImpl(reader, out, 1, 0, 2, 0, 7, 8, 0, 0, 2, 2);
             case 6 -> _decodeImpl(reader, out, 1, 0, 0, 0, 7, 7, 1, 0, 4, 0);
             case 7 -> _decodeImpl(reader, out, 2, 6, 0, 0, 5, 5, 1, 0, 2, 0);
-            case 8 -> Arrays.fill(out, Rgba.TRANSPARENT);
+            case 8 -> Arrays.fill(out, 0);
             default -> throw new AssertionError();
         }
     }
 
-    private static void _decodeImpl(BitReader in, Rgba[] out, int subsets, int partitionBits, int rotationBits, int indexSelectionBits, int colorBits, int alphaBits, int endpointPBits, int sharedPBits, int indexBits, int secondaryIndexBits) {
+    private static void _decodeImpl(BitReader in, int[] out, int subsets, int partitionBits, int rotationBits, int indexSelectionBits, int colorBits, int alphaBits, int endpointPBits, int sharedPBits, int indexBits, int secondaryIndexBits) {
         assert subsets > 0 && subsets <= 3;
         if (subsets == 1) {
             assert partitionBits == 0;
@@ -192,7 +190,7 @@ public final class BC7 {
                 }
             }
 
-            out[i] = new Rgba((byte) a, (byte) r, (byte) g, (byte) b);
+            out[i] = ((a & 0xFF) << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF);
         }
     }
 

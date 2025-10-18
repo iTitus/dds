@@ -1,22 +1,22 @@
-package io.github.ititus.dds;
+package io.github.ititus.ddsiio.internal;
 
 import java.util.Objects;
 
-public record Rgba(byte a, byte r, byte g, byte b) {
+public record Argb(byte a, byte r, byte g, byte b) {
 
-    public static final Rgba TRANSPARENT = fromA8R8G8B8(0x00000000);
-    public static final Rgba BLACK = fromA8R8G8B8(0xff000000);
-    public static final Rgba WHITE = fromA8R8G8B8(0xffffffff);
-    public static final Rgba RED = fromA8R8G8B8(0xffff0000);
-    public static final Rgba GREEN = fromA8R8G8B8(0xff00ff00);
-    public static final Rgba BLUE = fromA8R8G8B8(0xff0000ff);
+    public static final Argb TRANSPARENT = fromA8R8G8B8(0x00000000);
+    public static final Argb BLACK = fromA8R8G8B8(0xff000000);
+    public static final Argb WHITE = fromA8R8G8B8(0xffffffff);
+    public static final Argb RED = fromA8R8G8B8(0xffff0000);
+    public static final Argb GREEN = fromA8R8G8B8(0xff00ff00);
+    public static final Argb BLUE = fromA8R8G8B8(0xff0000ff);
 
-    public static Rgba fromR5G6B5(short color) {
+    public static Argb fromR5G6B5(short color) {
         int r = (color >>> 11) & 0x1f;
         int g = (color >>> 5) & 0x3f;
         int b = color & 0x1f;
         // exact multiplications would be 255/31 ≈ 8.2258 and 255/63 ≈ 4.0476 respectively
-        return new Rgba(
+        return new Argb(
                 (byte) 255,
                 (byte) ((r << 3) | (r >>> 2)), // equivalent to r * 8.25
                 (byte) ((g << 2) | (g >>> 4)), // equivalent to g * 4.0625
@@ -24,22 +24,22 @@ public record Rgba(byte a, byte r, byte g, byte b) {
         );
     }
 
-    public static Rgba fromR8G8B8(int color) {
+    public static Argb fromR8G8B8(int color) {
         int r = (color >>> 16) & 0xff;
         int g = (color >>> 8) & 0xff;
         int b = color & 0xff;
-        return new Rgba((byte) 255, (byte) r, (byte) g, (byte) b);
+        return new Argb((byte) 255, (byte) r, (byte) g, (byte) b);
     }
 
-    public static Rgba fromA8R8G8B8(int color) {
+    public static Argb fromA8R8G8B8(int color) {
         int a = (color >>> 24) & 0xff;
         int r = (color >>> 16) & 0xff;
         int g = (color >>> 8) & 0xff;
         int b = color & 0xff;
-        return new Rgba((byte) a, (byte) r, (byte) g, (byte) b);
+        return new Argb((byte) a, (byte) r, (byte) g, (byte) b);
     }
 
-    public Rgba lerp(Rgba target, int n1, int n2) {
+    public Argb lerp(Argb target, int n1, int n2) {
         Objects.requireNonNull(target, "target");
         if (n1 < 0) {
             throw new IllegalArgumentException("n1");
@@ -52,7 +52,7 @@ public record Rgba(byte a, byte r, byte g, byte b) {
         }
 
         int n = n1 + n2;
-        return new Rgba(
+        return new Argb(
                 (byte) ((n1 * this.a8() + n2 * target.a8() + n / 2) / n),
                 (byte) ((n1 * this.r8() + n2 * target.r8() + n / 2) / n),
                 (byte) ((n1 * this.g8() + n2 * target.g8() + n / 2) / n),
@@ -60,36 +60,36 @@ public record Rgba(byte a, byte r, byte g, byte b) {
         );
     }
 
-    public Rgba withAlpha(byte a) {
+    public Argb withAlpha(byte a) {
         if (this.a() == a) {
             return this;
         }
 
-        return new Rgba(a, this.r(), this.g(), this.b());
+        return new Argb(a, this.r(), this.g(), this.b());
     }
 
-    public Rgba withRed(byte r) {
+    public Argb withRed(byte r) {
         if (this.r() == r) {
             return this;
         }
 
-        return new Rgba(this.a(), r, this.g(), this.b());
+        return new Argb(this.a(), r, this.g(), this.b());
     }
 
-    public Rgba withGreen(byte g) {
+    public Argb withGreen(byte g) {
         if (this.g() == g) {
             return this;
         }
 
-        return new Rgba(this.a(), this.r(), g, this.b());
+        return new Argb(this.a(), this.r(), g, this.b());
     }
 
-    public Rgba withBlue(byte b) {
+    public Argb withBlue(byte b) {
         if (this.b() == b) {
             return this;
         }
 
-        return new Rgba(this.a(), this.r(), this.g(), b);
+        return new Argb(this.a(), this.r(), this.g(), b);
     }
 
     public int a8() {

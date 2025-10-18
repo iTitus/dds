@@ -3,7 +3,6 @@ package io.github.ititus.ddsiio.internal;
 import io.github.ititus.dds.D3dFormat;
 import io.github.ititus.dds.DxgiFormat;
 import io.github.ititus.dds.PixelFormat;
-import io.github.ititus.dds.Rgba;
 
 import java.awt.image.WritableRaster;
 import java.nio.ByteBuffer;
@@ -20,19 +19,18 @@ public final class BC {
             default -> throw new UnsupportedOperationException("unsupported block compression " + format);
         };
 
-        var decoded = new Rgba[16];
-        Arrays.fill(decoded, Rgba.TRANSPARENT);
-
+        int[] decoded = new int[16];
         for (int y = 0; Integer.compareUnsigned(y, h) < 0; y += 4) {
             int yMax = Math.min(4, h - y);
             for (int x = 0; Integer.compareUnsigned(x, w) < 0; x += 4) {
                 decoder.decode(b, decoded);
 
                 int xMax = Math.min(4, w - x);
-                for (int y_ = 0; y_ < yMax; y_++) {
-                    for (int x_ = 0; x_ < xMax; x_++) {
-                        var color = decoded[x_ + y_ * xMax];
-                        raster.setDataElements(x + x_, y + y_, new int[] { color.asA8R8G8B8() });
+                if (xMax == 4) {
+                    raster.setDataElements(x, y, xMax, yMax, decoded);
+                } else {
+                    for (int i = 0; i < yMax; i++) {
+                        raster.setDataElements(x, y, xMax, yMax, Arrays.copyOfRange(decoded, 4 * i, 4 * i + xMax));
                     }
                 }
             }
@@ -42,6 +40,6 @@ public final class BC {
     @FunctionalInterface
     public interface BlockDecoder {
 
-        void decode(ByteBuffer in, Rgba[] out);
+        void decode(ByteBuffer in, int[] out);
     }
 }

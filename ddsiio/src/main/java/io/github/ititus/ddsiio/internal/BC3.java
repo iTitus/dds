@@ -1,7 +1,6 @@
 package io.github.ititus.ddsiio.internal;
 
 import io.github.ititus.dds.DdsHelper;
-import io.github.ititus.dds.Rgba;
 
 import java.nio.ByteBuffer;
 
@@ -9,10 +8,10 @@ public final class BC3 {
 
     public static final BC.BlockDecoder DECODER = BC3::decode;
 
-    public static void decode(ByteBuffer in, Rgba[] out) {
+    public static void decode(ByteBuffer in, int[] out) {
         var alphas = new byte[8];
         var alphaIndices = new int[2];
-        var colors = new Rgba[4];
+        var colors = new int[4];
         var colorIndices = new byte[4];
         loadAlpha(in, alphas, alphaIndices);
         BC1.loadColors(in, colors, colorIndices, false);
@@ -20,7 +19,7 @@ public final class BC3 {
         for (int y_ = 0; y_ < 4; y_++) {
             for (int x_ = 0; x_ < 4; x_++) {
                 var alpha = lookupAlpha(alphas, alphaIndices, y_, x_);
-                out[x_ + y_ * 4] = BC1.lookupColor(colors, colorIndices, y_, x_).withAlpha(alpha);
+                out[x_ + y_ * 4] = (BC1.lookupColor(colors, colorIndices, y_, x_) & 0xFFFFFF) | ((alpha & 0xFF) << 24);
             }
         }
     }
