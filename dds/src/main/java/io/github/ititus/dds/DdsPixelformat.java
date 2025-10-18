@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.StringJoiner;
 
 import static io.github.ititus.dds.DdsConstants.*;
 
@@ -155,31 +156,35 @@ public record DdsPixelformat(
 
     @Override
     public String toString() {
-        List<String> list = new ArrayList<>(8);
+        StringJoiner j = new StringJoiner(", ", this.getClass().getSimpleName() + "[", "]");
         if (dwSize != SIZE) {
-            list.add("dwSize=" + Integer.toUnsignedString(dwSize));
+            j.add("dwSize=" + Integer.toUnsignedString(dwSize));
         }
         if (dwFlags != 0) {
-            list.add("dwFlags=0x" + Integer.toHexString(dwFlags));
+            j.add("dwFlags=0x" + Integer.toHexString(dwFlags));
         }
         if (dwFourCC != 0) {
-            list.add("dwFourCC=" + getStringFrom4CC(dwFourCC));
+            j.add("dwFourCC=" + getStringFrom4CC(dwFourCC));
         }
         if (dwRGBBitCount != 0) {
-            list.add("dwRGBBitCount=" + Integer.toUnsignedString(dwRGBBitCount));
+            j.add("dwRGBBitCount=" + Integer.toUnsignedString(dwRGBBitCount));
         }
         if (dwRBitMask != 0) {
-            list.add("dwRBitMask=0x" + Integer.toHexString(dwRBitMask));
+            j.add("dwRBitMask=0x" + Integer.toHexString(dwRBitMask));
         }
         if (dwGBitMask != 0) {
-            list.add("dwGBitMask=0x" + Integer.toHexString(dwGBitMask));
+            j.add("dwGBitMask=0x" + Integer.toHexString(dwGBitMask));
         }
         if (dwBBitMask != 0) {
-            list.add("dwBBitMask=0x" + Integer.toHexString(dwBBitMask));
+            j.add("dwBBitMask=0x" + Integer.toHexString(dwBBitMask));
         }
         if (dwABitMask != 0) {
-            list.add("dwABitMask=0x" + Integer.toHexString(dwABitMask));
+            j.add("dwABitMask=0x" + Integer.toHexString(dwABitMask));
         }
-        return "DdsPixelformat[" + String.join(", ", list) + ']';
+        var d3dFormat = this.d3dFormat();
+        if (d3dFormat != D3dFormat.UNKNOWN) {
+            j.add("d3dFormat=" + d3dFormat);
+        }
+        return j.toString();
     }
 }

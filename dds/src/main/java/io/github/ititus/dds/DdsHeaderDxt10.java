@@ -1,8 +1,7 @@
 package io.github.ititus.dds;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.StringJoiner;
 
 public record DdsHeaderDxt10(
         DxgiFormat dxgiFormat,
@@ -61,18 +60,21 @@ public record DdsHeaderDxt10(
 
     @Override
     public String toString() {
-        List<String> list = new ArrayList<>(5);
-        list.add("dxgiFormat=" + dxgiFormat);
-        list.add("resourceDimension=" + resourceDimension);
+        StringJoiner j = new StringJoiner(", ", this.getClass().getSimpleName() + "[", "]");
+        j.add("dxgiFormat=" + dxgiFormat);
+        j.add("resourceDimension=" + resourceDimension);
         if (miscFlag != 0) {
-            list.add("miscFlag=0x" + Integer.toHexString(miscFlag));
+            j.add("miscFlag=0x" + Integer.toHexString(miscFlag));
         }
-        if (arraySize != 0) {
-            list.add("arraySize=" + Integer.toUnsignedString(arraySize));
+        if (arraySize != 1) {
+            j.add("arraySize=" + Integer.toUnsignedString(arraySize));
         }
         if (miscFlags2 != 0) {
-            list.add("miscFlags2=0x" + Integer.toHexString(miscFlags2));
+            j.add("miscFlags2=0x" + Integer.toHexString(miscFlags2));
         }
-        return "DdsHeaderDxt10[" + String.join(", ", list) + ']';
+        if (this.isAlphaPremultiplied()) {
+            j.add("alphaPremultiplied");
+        }
+        return j.toString();
     }
 }

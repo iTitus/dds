@@ -3,6 +3,7 @@ package io.github.ititus.dds;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import static io.github.ititus.dds.DdsConstants.*;
 
@@ -153,73 +154,91 @@ public record DdsHeader(
 
     @Override
     public String toString() {
-        List<String> list = new ArrayList<>(24);
+        StringJoiner j = new StringJoiner(", ", this.getClass().getSimpleName() + "[", "]");
         if (dwSize != SIZE) {
-            list.add("dwSize=" + Integer.toUnsignedString(dwSize));
+            j.add("dwSize=" + Integer.toUnsignedString(dwSize));
         }
         if (dwFlags != 0) {
-            list.add("dwFlags=0x" + Integer.toHexString(dwFlags));
+            j.add("dwFlags=0x" + Integer.toHexString(dwFlags));
         }
-        list.add("dwHeight=" + dwHeight);
-        list.add("dwWidth=" + dwWidth);
+        j.add("dwHeight=" + dwHeight);
+        j.add("dwWidth=" + dwWidth);
         if (dwPitchOrLinearSize != 0) {
-            list.add((isUncompressed() ? "dwPitch=" : isCompressed() ? "dwLinearSize=" : "dwPitchOrLinearSize=") + Integer.toUnsignedString(dwPitchOrLinearSize));
+            j.add((isUncompressed() ? "dwPitch=" : isCompressed() ? "dwLinearSize=" : "dwPitchOrLinearSize=") + Integer.toUnsignedString(dwPitchOrLinearSize));
         }
         if (dwDepth != 0) {
-            list.add("dwDepth=" + Integer.toUnsignedString(dwDepth));
+            j.add("dwDepth=" + Integer.toUnsignedString(dwDepth));
         }
         if (dwMipMapCount != 0) {
-            list.add("dwMipMapCount=" + Integer.toUnsignedString(dwMipMapCount));
+            j.add("dwMipMapCount=" + Integer.toUnsignedString(dwMipMapCount));
         }
         if (dwReserved1_0 != 0) {
-            list.add("dwReserved[0]=" + DdsHelper.guessToString(dwReserved1_0));
+            j.add("dwReserved[0]=" + DdsHelper.guessToString(dwReserved1_0));
         }
         if (dwReserved1_1 != 0) {
-            list.add("dwReserved[1]=" + DdsHelper.guessToString(dwReserved1_1));
+            j.add("dwReserved[1]=" + DdsHelper.guessToString(dwReserved1_1));
         }
         if (dwReserved1_2 != 0) {
-            list.add("dwReserved[2]=" + DdsHelper.guessToString(dwReserved1_2));
+            j.add("dwReserved[2]=" + DdsHelper.guessToString(dwReserved1_2));
         }
         if (dwReserved1_3 != 0) {
-            list.add("dwReserved[3]=" + DdsHelper.guessToString(dwReserved1_3));
+            j.add("dwReserved[3]=" + DdsHelper.guessToString(dwReserved1_3));
         }
         if (dwReserved1_4 != 0) {
-            list.add("dwReserved[4]=" + DdsHelper.guessToString(dwReserved1_4));
+            j.add("dwReserved[4]=" + DdsHelper.guessToString(dwReserved1_4));
         }
         if (dwReserved1_5 != 0) {
-            list.add("dwReserved[5]=" + DdsHelper.guessToString(dwReserved1_5));
+            j.add("dwReserved[5]=" + DdsHelper.guessToString(dwReserved1_5));
         }
         if (dwReserved1_6 != 0) {
-            list.add("dwReserved[6]=" + DdsHelper.guessToString(dwReserved1_6));
+            j.add("dwReserved[6]=" + DdsHelper.guessToString(dwReserved1_6));
         }
         if (dwReserved1_7 != 0) {
-            list.add("dwReserved[7]=" + DdsHelper.guessToString(dwReserved1_7));
+            j.add("dwReserved[7]=" + DdsHelper.guessToString(dwReserved1_7));
         }
         if (dwReserved1_8 != 0) {
-            list.add("dwReserved[8]=" + DdsHelper.guessToString(dwReserved1_8));
+            j.add("dwReserved[8]=" + DdsHelper.guessToString(dwReserved1_8));
         }
         if (dwReserved1_9 != 0) {
-            list.add("dwReserved[9]=" + DdsHelper.guessToString(dwReserved1_9));
+            j.add("dwReserved[9]=" + DdsHelper.guessToString(dwReserved1_9));
         }
         if (dwReserved1_10 != 0) {
-            list.add("dwReserved[10]=" + DdsHelper.guessToString(dwReserved1_10));
+            j.add("dwReserved[10]=" + DdsHelper.guessToString(dwReserved1_10));
         }
         if (dwCaps != 0) {
-            list.add("dwCaps=0x" + Integer.toHexString(dwCaps));
+            j.add("dwCaps=0x" + Integer.toHexString(dwCaps));
         }
         if (dwCaps2 != 0) {
-            list.add("dwCaps2=0x" + Integer.toHexString(dwCaps2));
+            j.add("dwCaps2=0x" + Integer.toHexString(dwCaps2));
         }
         if (dwCaps3 != 0) {
-            list.add("dwCaps3=0x" + Integer.toHexString(dwCaps3));
+            j.add("dwCaps3=0x" + Integer.toHexString(dwCaps3));
         }
         if (dwCaps4 != 0) {
-            list.add("dwCaps4=0x" + Integer.toHexString(dwCaps4));
+            j.add("dwCaps4=0x" + Integer.toHexString(dwCaps4));
         }
         if (dwReserved2 != 0) {
-            list.add("dwReserved2=" + DdsHelper.guessToString(dwReserved2));
+            j.add("dwReserved2=" + DdsHelper.guessToString(dwReserved2));
         }
-        list.add("ddspf=" + ddspf);
-        return "DdsHeader[" + String.join(", ", list) + ']';
+        j.add("ddspf=" + ddspf);
+        if (this.isUncompressed()) {
+            j.add("uncompressed");
+        }
+        if (this.isCompressed()) {
+            j.add("compressed");
+        }
+        if (this.hasDepth()) {
+            j.add("depth");
+        }
+        if (this.hasMipmaps()) {
+            j.add("mipmaps");
+        }
+        if (this.isCubemap()) {
+            j.add("cubemap");
+        }
+        if (this.isVolumeTexture()) {
+            j.add("volume");
+        }
+        return j.toString();
     }
 }
