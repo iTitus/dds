@@ -194,7 +194,7 @@ public record DdsHeader(
         if (dwPitchOrLinearSize != 0) {
             j.add((isUncompressed() ? "dwPitch=" : isCompressed() ? "dwLinearSize=" : "dwPitchOrLinearSize=") + Integer.toUnsignedString(dwPitchOrLinearSize));
         }
-        if (dwDepth != 0) {
+        if (dwDepth != 1) {
             j.add("dwDepth=" + Integer.toUnsignedString(dwDepth));
         }
         if (dwMipMapCount != 0) {

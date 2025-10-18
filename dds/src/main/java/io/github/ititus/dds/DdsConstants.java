@@ -80,6 +80,26 @@ public final class DdsConstants {
     public static final int D3D10_RESOURCE_MISC_SHARED_KEYEDMUTEX = 0x10;
     public static final int D3D10_RESOURCE_MISC_GDI_COMPATIBLE = 0x20;
     public static final int DDS_RESOURCE_MISC_TEXTURECUBE = D3D10_RESOURCE_MISC_TEXTURECUBE;
+    public static final int D3D11_RESOURCE_MISC_GENERATE_MIPS = 0x1;
+    public static final int D3D11_RESOURCE_MISC_SHARED = 0x2;
+    public static final int D3D11_RESOURCE_MISC_TEXTURECUBE = 0x4;
+    public static final int D3D11_RESOURCE_MISC_DRAWINDIRECT_ARGS = 0x10;
+    public static final int D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS = 0x20;
+    public static final int D3D11_RESOURCE_MISC_BUFFER_STRUCTURED = 0x40;
+    public static final int D3D11_RESOURCE_MISC_RESOURCE_CLAMP = 0x80;
+    public static final int D3D11_RESOURCE_MISC_SHARED_KEYEDMUTEX = 0x100;
+    public static final int D3D11_RESOURCE_MISC_GDI_COMPATIBLE = 0x200;
+    public static final int D3D11_RESOURCE_MISC_SHARED_NTHANDLE = 0x800;
+    public static final int D3D11_RESOURCE_MISC_RESTRICTED_CONTENT = 0x1000;
+    public static final int D3D11_RESOURCE_MISC_RESTRICT_SHARED_RESOURCE = 0x2000;
+    public static final int D3D11_RESOURCE_MISC_RESTRICT_SHARED_RESOURCE_DRIVER = 0x4000;
+    public static final int D3D11_RESOURCE_MISC_GUARDED = 0x8000;
+    public static final int D3D11_RESOURCE_MISC_TILE_POOL = 0x20000;
+    public static final int D3D11_RESOURCE_MISC_TILED = 0x40000;
+    public static final int D3D11_RESOURCE_MISC_HW_PROTECTED = 0x80000;
+    // public static final int D3D11_RESOURCE_MISC_SHARED_DISPLAYABLE;
+    // public static final int D3D11_RESOURCE_MISC_SHARED_EXCLUSIVE_WRITER;
+    // public static final int D3D11_RESOURCE_MISC_NO_SHADER_ACCESS;
 
     // DdsHeaderDxt10.miscFlags2
     public static final int DDS_ALPHA_MODE_UNKNOWN = 0x0;
