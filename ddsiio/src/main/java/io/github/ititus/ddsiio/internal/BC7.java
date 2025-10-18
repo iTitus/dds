@@ -10,9 +10,9 @@ public final class BC7 {
     public static final BC.BlockDecoder DECODER = BC7::decode;
 
     private static void decode(ByteBuffer in, Rgba[] out) {
-        var data = new byte[16];
+        byte[] data = new byte[16];
         in.get(data);
-        var reader = new BitReader(data);
+        BitReader reader = new BitReader(data);
 
         int mode = 0;
         while (mode < 8 && reader.nextBit() == 0) {
@@ -137,17 +137,18 @@ public final class BC7 {
 
         // indices
 
-        var indices = new byte[out.length];
-        var secondaryIndices = new byte[out.length];
+        byte[] indices = new byte[out.length];
+        byte[] secondaryIndices;
         for (int i = 0; i < out.length; i++) {
             indices[i] = (byte) in.nextBits(isAnchorIndex(subsets, partition, i) ? indexBits - 1 : indexBits);
         }
-        for (int i = 0; i < out.length; i++) {
-            if (secondaryIndexBits > 0) {
+        if (secondaryIndexBits > 0) {
+            secondaryIndices = new byte[out.length];
+            for (int i = 0; i < out.length; i++) {
                 secondaryIndices[i] = (byte) in.nextBits(isAnchorIndex(subsets, partition, i) ? secondaryIndexBits - 1 : secondaryIndexBits);
-            } else {
-                secondaryIndices[i] = indices[i];
             }
+        } else {
+            secondaryIndices = Arrays.copyOf(indices, out.length);
         }
 
         assert in.pos() == 128;
@@ -158,10 +159,15 @@ public final class BC7 {
         int[] partitionTable = PARTITIONS[subsets - 1][partition];
         int[] colorWeights = indexSelection == 0 || secondaryIndexBits == 0 ? I[indexBits - 1] : I[secondaryIndexBits - 1];
         int[] alphaWeights = indexSelection == 0 && secondaryIndexBits > 0 ? I[secondaryIndexBits - 1] : I[indexBits - 1];
+        if (indexSelection != 0) {
+            byte[] tmp = secondaryIndices;
+            secondaryIndices = indices;
+            indices = tmp;
+        }
         for (int i = 0; i < out.length; i++) {
             int subset = partitionTable[i];
-            int colorWeight = colorWeights[indexSelection == 0 ? indices[i] : secondaryIndices[i]];
-            int alphaWeight = alphaWeights[indexSelection == 0 ? secondaryIndices[i] : indices[i]];
+            int colorWeight = colorWeights[Byte.toUnsignedInt(indices[i])];
+            int alphaWeight = alphaWeights[Byte.toUnsignedInt(secondaryIndices[i])];
 
             int r = (Byte.toUnsignedInt(endpoints[4 * (2 * subset)]) * (64 - colorWeight) + Byte.toUnsignedInt(endpoints[4 * (2 * subset + 1)]) * colorWeight + 32) >>> 6;
             int g = (Byte.toUnsignedInt(endpoints[4 * (2 * subset) + 1]) * (64 - colorWeight) + Byte.toUnsignedInt(endpoints[4 * (2 * subset + 1) + 1]) * colorWeight + 32) >>> 6;

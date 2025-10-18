@@ -58,4 +58,16 @@ class BitReaderTest {
         r.nextBit();
         assertEquals(Byte.toUnsignedInt((byte) 0b10_101), r.nextBits(5));
     }
+
+    @Test
+    void testNextBitsMultiByte() {
+        byte b1 = (byte) 0b1010_1010;
+        byte b2 = (byte) 0b1010_1010;
+        var r = new BitReader(new byte[] { b1, b2 });
+        r.nextBit();
+        r.nextBit();
+        r.nextBit();
+        r.nextBit();
+        assertEquals(Byte.toUnsignedInt((byte) 0b010_1010), r.nextBits(7));
+    }
 }

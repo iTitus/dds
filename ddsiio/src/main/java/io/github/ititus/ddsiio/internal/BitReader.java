@@ -26,17 +26,11 @@ public final class BitReader {
         return this.pos % Byte.SIZE;
     }
 
-    private void next() {
-        this.pos++;
-    }
-
-    private int bit() {
-        byte element = this.data[this.dataPos()];
-        return (Byte.toUnsignedInt(element) >>> this.bitPos()) & 0b1;
-    }
-
     public int nextBit() {
-        return this.nextBits(1);
+        byte element = this.data[this.dataPos()];
+        int result = (Byte.toUnsignedInt(element) >>> this.bitPos()) & 0b1;
+        this.pos++;
+        return result;
     }
 
     public int nextBits(int bitAmount) {
@@ -45,9 +39,12 @@ public final class BitReader {
         }
 
         int result = 0;
-        for (int i = 0; i < bitAmount; i++) {
-            result |= this.bit() << i;
-            this.next();
+        for (int i = 0; i < bitAmount; ) {
+            int remaining = Math.min(Byte.SIZE - this.bitPos(), bitAmount - i);
+            byte element = this.data[this.dataPos()];
+            result |= ((Byte.toUnsignedInt(element) >>> this.bitPos()) & ((1 << remaining) - 1)) << i;
+            this.pos += remaining;
+            i += remaining;
         }
         return result;
     }

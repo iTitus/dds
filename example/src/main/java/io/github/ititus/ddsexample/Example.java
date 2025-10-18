@@ -103,6 +103,7 @@ public final class Example {
     }
 
     static void convertRecursive(Path inDir, Path outDir, String formatName, boolean all) throws Exception {
+        long now = System.nanoTime();
         doRecursive(inDir, file -> {
             Path relative = inDir.relativize(file);
             Path relativeDir = relative.getParent();
@@ -123,6 +124,8 @@ public final class Example {
                 System.out.println(relative.toString().replace('\\', '/') + ": " + msg);
             }
         });
+        long elapsed = System.nanoTime() - now;
+        System.out.printf("conversion done after %.0f ms%n",  elapsed / 1e6);
     }
 
     static void convertTo(Path in, Path outDir, String formatName, boolean all) throws IOException {
