@@ -61,8 +61,12 @@ public record DdsHeaderDxt10(
     @Override
     public String toString() {
         StringJoiner j = new StringJoiner(", ", this.getClass().getSimpleName() + "[", "]");
-        j.add("dxgiFormat=" + dxgiFormat);
-        j.add("resourceDimension=" + resourceDimension);
+        if (dxgiFormat != DxgiFormat.UNKNOWN) {
+            j.add("dxgiFormat=" + dxgiFormat);
+        }
+        if (resourceDimension != D3d10ResourceDimension.D3D10_RESOURCE_DIMENSION_UNKNOWN) {
+            j.add("resourceDimension=" + resourceDimension);
+        }
         if (miscFlag != 0) {
             j.add("miscFlag=0x" + Integer.toHexString(miscFlag));
         }
@@ -70,10 +74,19 @@ public record DdsHeaderDxt10(
             j.add("arraySize=" + Integer.toUnsignedString(arraySize));
         }
         if (miscFlags2 != 0) {
-            j.add("miscFlags2=0x" + Integer.toHexString(miscFlags2));
-        }
-        if (this.isAlphaPremultiplied()) {
-            j.add("alphaPremultiplied");
+            StringJoiner j2 = new StringJoiner(",", "miscFlags2=[", "]");
+            j2.add("alphaMode=" + switch (miscFlags2 & 0x7) {
+                case 0x0 -> "unknown";
+                case 0x1 -> "straight";
+                case 0x2 -> "premultiplied";
+                case 0x3 -> "opaque";
+                case 0x4 -> "custom";
+                default -> "?";
+            });
+            j.add(j2.toString());
+            if ((miscFlags2 & ~(0x7)) != 0 || (miscFlags2 & 0x7) > 0x4) {
+                j.add("miscFlags2=0x" + Integer.toHexString(miscFlags2));
+            }
         }
         return j.toString();
     }

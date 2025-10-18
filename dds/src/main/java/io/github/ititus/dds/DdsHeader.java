@@ -159,7 +159,35 @@ public record DdsHeader(
             j.add("dwSize=" + Integer.toUnsignedString(dwSize));
         }
         if (dwFlags != 0) {
-            j.add("dwFlags=0x" + Integer.toHexString(dwFlags));
+            StringJoiner j2 = new StringJoiner(",", "dwFlags=[", "]");
+            if ((dwFlags & DDSD_CAPS) == DDSD_CAPS) {
+                j2.add("caps");
+            }
+            if ((dwFlags & DDSD_HEIGHT) == DDSD_HEIGHT) {
+                j2.add("height");
+            }
+            if ((dwFlags & DDSD_WIDTH) == DDSD_WIDTH) {
+                j2.add("width");
+            }
+            if ((dwFlags & DDSD_PITCH) == DDSD_PITCH) {
+                j2.add("pitch");
+            }
+            if ((dwFlags & DDSD_PIXELFORMAT) == DDSD_PIXELFORMAT) {
+                j2.add("pixelformat");
+            }
+            if ((dwFlags & DDSD_MIPMAPCOUNT) == DDSD_MIPMAPCOUNT) {
+                j2.add("mipmapcount");
+            }
+            if ((dwFlags & DDSD_LINEARSIZE) == DDSD_LINEARSIZE) {
+                j2.add("linearsize");
+            }
+            if ((dwFlags & DDSD_DEPTH) == DDSD_DEPTH) {
+                j2.add("depth");
+            }
+            j.add(j2.toString());
+            if ((dwFlags & ~(DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PITCH | DDSD_PIXELFORMAT | DDSD_MIPMAPCOUNT | DDSD_LINEARSIZE | DDSD_DEPTH)) != 0) {
+                j.add("dwFlags=0x" + Integer.toHexString(dwFlags));
+            }
         }
         j.add("dwHeight=" + dwHeight);
         j.add("dwWidth=" + dwWidth);
@@ -206,10 +234,51 @@ public record DdsHeader(
             j.add("dwReserved[10]=" + DdsHelper.guessToString(dwReserved1_10));
         }
         if (dwCaps != 0) {
-            j.add("dwCaps=0x" + Integer.toHexString(dwCaps));
+            StringJoiner j2 = new StringJoiner(",", "dwCaps=[", "]");
+            if ((dwCaps & DDSCAPS_COMPLEX) == DDSCAPS_COMPLEX) {
+                j2.add("complex");
+            }
+            if ((dwCaps & DDSCAPS_MIPMAP) == DDSCAPS_MIPMAP) {
+                j2.add("mipmap");
+            }
+            if ((dwCaps & DDSCAPS_TEXTURE) == DDSCAPS_TEXTURE) {
+                j2.add("texture");
+            }
+            j.add(j2.toString());
+            if ((dwCaps & ~(DDSCAPS_COMPLEX | DDSCAPS_MIPMAP | DDSCAPS_TEXTURE)) != 0) {
+                j.add("dwCaps=0x" + Integer.toHexString(dwCaps));
+            }
         }
         if (dwCaps2 != 0) {
-            j.add("dwCaps2=0x" + Integer.toHexString(dwCaps2));
+            StringJoiner j2 = new StringJoiner(",", "dwCaps2=[", "]");
+            if ((dwCaps2 & DDSCAPS2_CUBEMAP) == DDSCAPS2_CUBEMAP) {
+                j2.add("cubemap");
+            }
+            if ((dwCaps2 & DDSCAPS2_CUBEMAP_POSITIVEX) == DDSCAPS2_CUBEMAP_POSITIVEX) {
+                j2.add("cubemapPositiveX");
+            }
+            if ((dwCaps2 & DDSCAPS2_CUBEMAP_NEGATIVEX) == DDSCAPS2_CUBEMAP_NEGATIVEX) {
+                j2.add("cubemapNegativeX");
+            }
+            if ((dwCaps2 & DDSCAPS2_CUBEMAP_POSITIVEY) == DDSCAPS2_CUBEMAP_POSITIVEY) {
+                j2.add("cubemapPositiveY");
+            }
+            if ((dwCaps2 & DDSCAPS2_CUBEMAP_NEGATIVEY) == DDSCAPS2_CUBEMAP_NEGATIVEY) {
+                j2.add("cubemapNegativeY");
+            }
+            if ((dwCaps2 & DDSCAPS2_CUBEMAP_POSITIVEZ) == DDSCAPS2_CUBEMAP_POSITIVEZ) {
+                j2.add("cubemapPositiveZ");
+            }
+            if ((dwCaps2 & DDSCAPS2_CUBEMAP_NEGATIVEZ) == DDSCAPS2_CUBEMAP_NEGATIVEZ) {
+                j2.add("cubemapNegativeZ");
+            }
+            if ((dwCaps2 & DDSCAPS2_VOLUME) == DDSCAPS2_VOLUME) {
+                j2.add("volume");
+            }
+            j.add(j2.toString());
+            if ((dwCaps2 & ~(DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_POSITIVEX | DDSCAPS2_CUBEMAP_NEGATIVEX | DDSCAPS2_CUBEMAP_POSITIVEY | DDSCAPS2_CUBEMAP_NEGATIVEY | DDSCAPS2_CUBEMAP_POSITIVEZ | DDSCAPS2_CUBEMAP_NEGATIVEZ | DDSCAPS2_VOLUME)) != 0) {
+                j.add("dwCaps2=0x" + Integer.toHexString(dwCaps2));
+            }
         }
         if (dwCaps3 != 0) {
             j.add("dwCaps3=0x" + Integer.toHexString(dwCaps3));
@@ -221,24 +290,6 @@ public record DdsHeader(
             j.add("dwReserved2=" + DdsHelper.guessToString(dwReserved2));
         }
         j.add("ddspf=" + ddspf);
-        if (this.isUncompressed()) {
-            j.add("uncompressed");
-        }
-        if (this.isCompressed()) {
-            j.add("compressed");
-        }
-        if (this.hasDepth()) {
-            j.add("depth");
-        }
-        if (this.hasMipmaps()) {
-            j.add("mipmaps");
-        }
-        if (this.isCubemap()) {
-            j.add("cubemap");
-        }
-        if (this.isVolumeTexture()) {
-            j.add("volume");
-        }
         return j.toString();
     }
 }

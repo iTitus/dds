@@ -35,7 +35,7 @@ public record DdsPixelformat(
     }
 
     public boolean shouldLoadHeader10() {
-        return dwFlags == DDPF_FOURCC && dwFourCC == DDS_DX10;
+        return dwFourCC == DDS_DX10;
     }
 
     public boolean isValid(boolean strict) {
@@ -161,7 +161,29 @@ public record DdsPixelformat(
             j.add("dwSize=" + Integer.toUnsignedString(dwSize));
         }
         if (dwFlags != 0) {
-            j.add("dwFlags=0x" + Integer.toHexString(dwFlags));
+            StringJoiner j2 = new StringJoiner(",", "dwFlags=[", "]");
+            if ((dwFlags & DDPF_ALPHAPIXELS) == DDPF_ALPHAPIXELS) {
+                j2.add("alphaPixels");
+            }
+            if ((dwFlags & DDPF_ALPHA) == DDPF_ALPHA) {
+                j2.add("alpha");
+            }
+            if ((dwFlags & DDPF_FOURCC) == DDPF_FOURCC) {
+                j2.add("fourCC");
+            }
+            if ((dwFlags & DDPF_RGB) == DDPF_RGB) {
+                j2.add("rgb");
+            }
+            if ((dwFlags & DDPF_YUV) == DDPF_YUV) {
+                j2.add("yuv");
+            }
+            if ((dwFlags & DDPF_LUMINANCE) == DDPF_LUMINANCE) {
+                j2.add("luminance");
+            }
+            j.add(j2.toString());
+            if ((dwFlags & ~(DDPF_ALPHAPIXELS | DDPF_ALPHA | DDPF_FOURCC | DDPF_RGB | DDPF_YUV | DDPF_LUMINANCE)) != 0) {
+                j.add("dwFlags=0x" + Integer.toHexString(dwFlags));
+            }
         }
         if (dwFourCC != 0) {
             j.add("dwFourCC=" + getStringFrom4CC(dwFourCC));
