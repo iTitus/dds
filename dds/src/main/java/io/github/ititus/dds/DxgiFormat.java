@@ -154,7 +154,7 @@ public enum DxgiFormat implements PixelFormat {
     }
 
     public int value() {
-        return ordinal();
+        return this.value;
     }
 
     @Override
@@ -261,10 +261,18 @@ public enum DxgiFormat implements PixelFormat {
     }
 
     @Override
-    public boolean isPlanar() {
+    public boolean isYUVFormat() {
         return switch (this) {
-            case NV12, P010, P016, _420_OPAQUE, NV11,
-                 P208, V208, V408 -> true;
+            // YUV
+            case AYUV, Y410, Y416, NV12, P010, P016, _420_OPAQUE, YUY2, Y210, Y216, NV11,
+                 // these are palletized YUV formats
+                 AI44, IA44,
+                 // these are palletized formats that can be used with YUV and RGB
+                 P8, A8P8,
+                 // YUV
+                 P208,
+                 // technically YCbCr formats
+                 V208, V408 -> true;
             default -> false;
         };
     }

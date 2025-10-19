@@ -1,12 +1,12 @@
 package io.github.ititus.ddsiio.internal;
 
-import io.github.ititus.dds.*;
+import io.github.ititus.dds.D3dFormat;
+import io.github.ititus.dds.DxgiFormat;
+import io.github.ititus.dds.PixelFormat;
 
 import java.awt.image.WritableRaster;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-
-import static io.github.ititus.dds.DdsConstants.*;
 
 public final class BC {
 
@@ -35,19 +35,6 @@ public final class BC {
                 }
             }
         }
-    }
-
-    public static boolean isBlockCompressed(DdsPixelformat pf) {
-        if ((pf.dwFlags() & DdsConstants.DDPF_FOURCC) == DdsConstants.DDPF_FOURCC) {
-            int fcc = pf.dwFourCC();
-            if (fcc == D3DFMT_DXT1 || fcc == D3DFMT_DXT2 || fcc == D3DFMT_DXT3 || fcc == D3DFMT_DXT4 || fcc == D3DFMT_DXT5
-                    || fcc == DXGI_FORMAT_BC4_UNORM || fcc == DXGI_FORMAT_BC4_UNORM_ALT || fcc == DXGI_FORMAT_BC4_SNORM
-                    || fcc == DXGI_FORMAT_BC5_UNORM || fcc == DXGI_FORMAT_BC5_SNORM) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     @FunctionalInterface
