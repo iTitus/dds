@@ -51,7 +51,7 @@ public final class Util {
                     0,
                     0,
                     0,
-                    pf.dwABitMask(),
+                    pf.dwABitMask() == 0 ? (1 << pf.dwRGBBitCount()) - 1 : pf.dwABitMask(),
                     false
             );
         } else if (isBlockCompressed(pf)) {
