@@ -9,23 +9,22 @@
 
 Read `dds` images (DirectDrawSurface), an image format made by Microsoft for DirectX.
 
-Currently targeting Java 21+ and JavaFX 21+.
+Currently targeting Java 21+.
 
 ## Supported formats
 
 - All UINT/UNORM/SRGB RGB(A) formats
 - Block compressed formats
-  - BC1/DXT1
-  - BC2/DXT2/DXT3
-  - BC3/DXT4/DXT5
-  - BC7
+    - BC1/DXT1
+    - BC2/DXT2/DXT3
+    - BC3/DXT4/DXT5
+    - BC7
 
 ## Targets:
 
 - `DdsFile` (`dds` module, basic routines to load a dds file into memory)
 - Java `BufferedImage` (`ddsiio` module, this is the one you want)
 - JavaFX `Image` (`ddsfx` module, obsolete starting with JavaFX 24)
-
 
 ## dds
 
@@ -35,9 +34,9 @@ Currently targeting Java 21+ and JavaFX 21+.
 
 - adds dds support to `ImageIO` automatically
 - this requires the `java.desktop` module
-- also adds dds support for JavaFX `Image` starting with JavaFX 24
+- also adds dds support for JavaFX `Image` automatically, starting with JavaFX 24
 
-## ddsfx
+## ddsfx (deprecated)
 
 > [!IMPORTANT]  
 > This module is no longer required as of JavaFX 24, one can use `ddsiio` instead!
