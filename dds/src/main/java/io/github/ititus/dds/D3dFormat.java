@@ -158,4 +158,9 @@ public enum D3dFormat implements PixelFormat {
     public boolean isPlanar() {
         return false;
     }
+
+    @Override
+    public boolean isSRGB() {
+        return false;
+    }
 }

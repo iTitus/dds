@@ -268,4 +268,12 @@ public enum DxgiFormat implements PixelFormat {
             default -> false;
         };
     }
+
+    @Override
+    public boolean isSRGB() {
+        return switch (this) {
+            case R8G8B8A8_UNORM_SRGB, BC1_UNORM_SRGB, BC2_UNORM_SRGB, BC3_UNORM_SRGB, B8G8R8A8_UNORM_SRGB, B8G8R8X8_UNORM_SRGB, BC7_UNORM_SRGB -> true;
+            default -> false;
+        };
+    }
 }

@@ -17,4 +17,7 @@ public sealed interface PixelFormat permits D3dFormat, DxgiFormat {
     boolean isPacked();
 
     boolean isPlanar();
+
+    boolean isSRGB();
+
 }

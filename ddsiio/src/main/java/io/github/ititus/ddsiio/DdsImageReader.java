@@ -1,9 +1,6 @@
 package io.github.ititus.ddsiio;
 
-import io.github.ititus.dds.DdsFile;
-import io.github.ititus.dds.DdsHelper;
-import io.github.ititus.dds.DdsResource;
-import io.github.ititus.dds.PixelFormat;
+import io.github.ititus.dds.*;
 import io.github.ititus.ddsiio.internal.BC;
 import io.github.ititus.ddsiio.internal.Util;
 
@@ -20,6 +17,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Iterator;
 import java.util.List;
+
+import static io.github.ititus.dds.DdsConstants.*;
 
 public class DdsImageReader extends ImageReader {
 
@@ -96,23 +95,48 @@ public class DdsImageReader extends ImageReader {
 
         try {
             PixelFormat format = dds.isDxt10() ? dds.dxgiFormat() : dds.d3dFormat();
-            if (format.isBlockCompressed()) {
-                BC.decode(h, w, raster, b, format);
-            } else if (format.isPacked()) {
+            if (format.isPacked()) {
                 throw new UnsupportedOperationException("unsupported packed format " + format);
             } else if (format.isPlanar()) {
                 throw new UnsupportedOperationException("unsupported planar format " + format);
+            } else if (format.isBlockCompressed()) {
+                BC.decode(h, w, raster, b, format);
+            } else if (BC.isBlockCompressed(dds.header().ddspf())) {
+                DxgiFormat dxgiFormat;
+                int fcc = dds.header().ddspf().dwFourCC();
+                if (fcc == D3DFMT_DXT1) {
+                    dxgiFormat = DxgiFormat.BC1_UNORM;
+                } else if (fcc == D3DFMT_DXT2) {
+                    dxgiFormat = DxgiFormat.BC2_UNORM;
+                } else if (fcc == D3DFMT_DXT3) {
+                    dxgiFormat = DxgiFormat.BC2_UNORM;
+                } else if (fcc == D3DFMT_DXT4) {
+                    dxgiFormat = DxgiFormat.BC3_UNORM;
+                } else if (fcc == D3DFMT_DXT5) {
+                    dxgiFormat = DxgiFormat.BC3_UNORM;
+                } else if (fcc == DXGI_FORMAT_BC4_UNORM || fcc == DXGI_FORMAT_BC4_UNORM_ALT) {
+                    dxgiFormat = DxgiFormat.BC4_UNORM;
+                } else if (fcc == DXGI_FORMAT_BC4_SNORM) {
+                    dxgiFormat = DxgiFormat.BC4_SNORM;
+                } else if (fcc == DXGI_FORMAT_BC5_UNORM) {
+                    dxgiFormat = DxgiFormat.BC5_UNORM;
+                } else if (fcc == DXGI_FORMAT_BC5_SNORM) {
+                    dxgiFormat = DxgiFormat.BC5_SNORM;
+                } else {
+                    throw new AssertionError();
+                }
+                BC.decode(h, w, raster, b, dxgiFormat);
             } else {
+                // assume RGB(A) packed format
                 int bpp = format.getBitsPerPixel();
                 for (int y = 0; Integer.compareUnsigned(y, h) < 0; y++) {
                     for (int x = 0; Integer.compareUnsigned(x, w) < 0; x++) {
-                        // TODO: support other bpp
                         Object arr = switch (bpp) {
                             case 8 -> new byte[] { b.get() };
                             case 16 -> new short[] { b.getShort() };
                             case 24 -> new int[] { DdsHelper.read24(b) };
                             case 32 -> new int[] { b.getInt() };
-                            default -> throw new UnsupportedOperationException("unsupported bpp " + bpp + " from format " + format);
+                            default -> throw new UnsupportedOperationException("unsupported bpp " + bpp + " for assumed packed format " + format);
                         };
                         raster.setDataElements(x, y, arr);
                     }

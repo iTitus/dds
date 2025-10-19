@@ -63,7 +63,8 @@ public final class DdsConstants {
     public static final int D3DFMT_DXT4 = make4CC("DXT4");
     public static final int D3DFMT_DXT5 = make4CC("DXT5");
     public static final int DDS_DX10 = make4CC("DX10");
-    public static final int DXGI_FORMAT_BC4_UNORM = make4CC("BC4U");
+    public static final int DXGI_FORMAT_BC4_UNORM = make4CC("ATI1");
+    public static final int DXGI_FORMAT_BC4_UNORM_ALT = make4CC("BC4U");
     public static final int DXGI_FORMAT_BC4_SNORM = make4CC("BC4S");
     public static final int DXGI_FORMAT_BC5_UNORM = make4CC("ATI2");
     public static final int DXGI_FORMAT_BC5_SNORM = make4CC("BC5S");
