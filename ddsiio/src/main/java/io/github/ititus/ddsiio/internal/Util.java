@@ -41,7 +41,7 @@ public final class Util {
                     pf.dwRBitMask(),
                     pf.dwGBitMask(),
                     pf.dwBBitMask(),
-                    (f & DDPF_ALPHAPIXELS) == DDPF_ALPHAPIXELS ? pf.dwABitMask() : 0,
+                    pf.dwABitMask(),
                     false
             );
         } else if ((f & DDPF_ALPHA) == DDPF_ALPHA) {
