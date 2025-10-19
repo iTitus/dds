@@ -1,7 +1,5 @@
 package io.github.ititus.ddsiio.internal;
 
-import io.github.ititus.dds.DdsHelper;
-
 import java.nio.ByteBuffer;
 
 public final class BC3 {
@@ -27,8 +25,8 @@ public final class BC3 {
     private static void loadAlpha(ByteBuffer b, byte[] alphas, int[] alphaIndices) {
         byte rawA0 = b.get();
         byte rawA1 = b.get();
-        alphaIndices[0] = DdsHelper.read24(b);
-        alphaIndices[1] = DdsHelper.read24(b);
+        alphaIndices[0] = Util.read24(b);
+        alphaIndices[1] = Util.read24(b);
 
         int a0 = Byte.toUnsignedInt(rawA0);
         int a1 = Byte.toUnsignedInt(rawA1);

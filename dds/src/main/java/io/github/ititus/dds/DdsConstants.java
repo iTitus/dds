@@ -42,8 +42,7 @@ public final class DdsConstants {
     public static final int DDS_CUBEMAP_POSITIVEY = DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_POSITIVEY;
     public static final int DDS_CUBEMAP_NEGATIVEY = DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_NEGATIVEY;
     public static final int DDS_CUBEMAP_POSITIVEZ = DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_POSITIVEZ;
-    public static final int DDS_CUBEMAP_ALLFACES =
-            DDS_CUBEMAP_POSITIVEX | DDS_CUBEMAP_NEGATIVEX | DDS_CUBEMAP_POSITIVEY | DDS_CUBEMAP_NEGATIVEY | DDS_CUBEMAP_POSITIVEZ | DDSCAPS2_CUBEMAP_NEGATIVEZ;
+    public static final int DDS_CUBEMAP_ALLFACES = DDS_CUBEMAP_POSITIVEX | DDS_CUBEMAP_NEGATIVEX | DDS_CUBEMAP_POSITIVEY | DDS_CUBEMAP_NEGATIVEY | DDS_CUBEMAP_POSITIVEZ | DDSCAPS2_CUBEMAP_NEGATIVEZ;
     public static final int DDS_CUBEMAP_NEGATIVEZ = DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_NEGATIVEZ;
     public static final int DDS_FLAGS_VOLUME = DDSCAPS2_VOLUME;
 
@@ -51,10 +50,16 @@ public final class DdsConstants {
     public static final int DDPF_ALPHAPIXELS = 0x1;
     public static final int DDPF_ALPHA = 0x2;
     public static final int DDPF_FOURCC = 0x4;
+    public static final int DDPF_PAL8 = 0x20;
     public static final int DDPF_RGB = 0x40;
     public static final int DDPF_YUV = 0x200;
     public static final int DDPF_LUMINANCE = 0x20000;
+    public static final int DDPF_BUMPLUMINANCE = 0x40000;
+    public static final int DDPF_BUMPDUDV = 0x80000;
+    public static final int DDS_PAL8A = DDPF_PAL8 | DDPF_ALPHAPIXELS;
     public static final int DDS_RGBA = DDPF_RGB | DDPF_ALPHAPIXELS;
+    public static final int DDS_LUMINANCEA = DDPF_LUMINANCE | DDPF_ALPHAPIXELS;
+    public static final int DDS_BUMPDUDVA = DDPF_BUMPDUDV | DDPF_ALPHAPIXELS;
 
     // DdsPixelformat.dwFourCC
     public static final int D3DFMT_DXT1 = make4CC("DXT1");
@@ -67,6 +72,7 @@ public final class DdsConstants {
     public static final int DXGI_FORMAT_BC4_UNORM_ALT = make4CC("BC4U");
     public static final int DXGI_FORMAT_BC4_SNORM = make4CC("BC4S");
     public static final int DXGI_FORMAT_BC5_UNORM = make4CC("ATI2");
+    public static final int DXGI_FORMAT_BC5_UNORM_ALT = make4CC("BC5U");
     public static final int DXGI_FORMAT_BC5_SNORM = make4CC("BC5S");
     public static final int D3DFMT_R8G8_B8G8 = make4CC("RGBG");
     public static final int D3DFMT_G8R8_G8B8 = make4CC("GRGB");

@@ -7,6 +7,8 @@ import java.awt.color.ColorSpace;
 import java.awt.image.ColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.DirectColorModel;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import static io.github.ititus.dds.DdsConstants.*;
 
@@ -15,50 +17,44 @@ public final class Util {
     private Util() {}
 
     public static ImageTypeSpecifier imageType(DdsFile file) {
-        if (file.isDxt10()) {
-            return imageType(file.header10().dxgiFormat(), file.header10().isAlphaPremultiplied());
+        return imageType(file.header(), file.header10());
+    }
+
+    public static ImageTypeSpecifier imageType(DdsHeader header, DdsHeaderDxt10 header10) {
+        if (header10 != null) {
+            return imageType(header10.dxgiFormat(), header10.isAlphaPremultiplied());
         }
 
-        return imageType(file.header());
+        return imageType(header.ddspf());
     }
 
     /**
      * Get the image type specifier for the resulting BufferedImage after decompression / to-RGB conversion.
      */
-    private static ImageTypeSpecifier imageType(DdsHeader header) {
-        DdsPixelformat pf = header.ddspf();
+    private static ImageTypeSpecifier imageType(DdsPixelformat pf) {
+        // shortcuts to not have to derive the dxgi/d3d format first
         int f = pf.dwFlags();
-
-        // we only look at the pf values when the FOURCC flag is NOT set
-        if ((f & DDPF_FOURCC) != DDPF_FOURCC) {
-            if ((f & DDPF_RGB) == DDPF_RGB) {
-                return packedRGB(
-                        false,
-                        pf.dwRGBBitCount(),
-                        pf.dwRBitMask(),
-                        pf.dwGBitMask(),
-                        pf.dwBBitMask(),
-                        (f & DDPF_ALPHAPIXELS) == DDPF_ALPHAPIXELS ? pf.dwABitMask() : 0,
-                        false
-                );
-            } else if ((f & DDPF_ALPHA) == DDPF_ALPHA) {
-                return packedRGB(
-                        false,
-                        pf.dwRGBBitCount(),
-                        0,
-                        0,
-                        0,
-                        pf.dwABitMask(),
-                        false
-                );
-            } else if ((f & DDPF_YUV) == DDPF_YUV) {
-                throw new UnsupportedOperationException("unsupported YUV format " + header);
-            } else if ((f & DDPF_LUMINANCE) == DDPF_LUMINANCE) {
-                throw new UnsupportedOperationException("unsupported luminance format " + header);
-            }
-        }
-
-        if (isBlockCompressed(pf)) {
+        if ((f & DDPF_RGB) == DDPF_RGB) {
+            return packedRGB(
+                    false,
+                    pf.dwRGBBitCount(),
+                    pf.dwRBitMask(),
+                    pf.dwGBitMask(),
+                    pf.dwBBitMask(),
+                    (f & DDPF_ALPHAPIXELS) == DDPF_ALPHAPIXELS ? pf.dwABitMask() : 0,
+                    false
+            );
+        } else if ((f & DDPF_ALPHA) == DDPF_ALPHA) {
+            return packedRGB(
+                    false,
+                    pf.dwRGBBitCount(),
+                    0,
+                    0,
+                    0,
+                    pf.dwABitMask(),
+                    false
+            );
+        } else if (isBlockCompressed(pf)) {
             // special case for block compressed formats derived from the fourCC code
             // because of the alphaPremultiplied check
             return packedRGB(
@@ -70,18 +66,35 @@ public final class Util {
                     0xff000000,
                     pf.dwFourCC() == D3DFMT_DXT2 || pf.dwFourCC() == D3DFMT_DXT4
             );
+        }
+
+        DxgiFormat dxgiFormat = pf.deriveDxgiFormat();
+        if (dxgiFormat != DxgiFormat.UNKNOWN) {
+            try {
+                return imageType(dxgiFormat, false);
+            } catch (Exception e) {
+                throw new UnsupportedOperationException("unsupported format " + pf, e);
+            }
         } else {
-            DxgiFormat dxgiFormat = deriveDxgiFormat(header);
-            if (dxgiFormat != DxgiFormat.UNKNOWN) {
+            D3dFormat d3dFormat = pf.deriveD3dFormat();
+            if (d3dFormat != D3dFormat.UNKNOWN) {
                 try {
-                    return imageType(dxgiFormat, false);
+                    return imageType(d3dFormat);
                 } catch (Exception e) {
-                    throw new UnsupportedOperationException("unsupported format " + header, e);
+                    throw new UnsupportedOperationException("unsupported format " + pf, e);
                 }
             }
         }
 
-        throw new UnsupportedOperationException("unsupported format " + header);
+        throw new UnsupportedOperationException("unsupported format " + pf);
+    }
+
+    /**
+     * Get the image type specifier for the resulting BufferedImage after decompression / to-RGB conversion.
+     */
+    private static ImageTypeSpecifier imageType(D3dFormat format) {
+        // TODO: implement some fallbacks
+        throw new UnsupportedOperationException("unsupported format " + format);
     }
 
     /**
@@ -217,50 +230,8 @@ public final class Util {
         };
     }
 
-    public static DxgiFormat deriveDxgiFormat(DdsHeader header) {
-        DdsPixelformat pf = header.ddspf();
-        int fcc = pf.dwFourCC();
-        if ((pf.dwFlags() & DdsConstants.DDPF_FOURCC) == DdsConstants.DDPF_FOURCC) {
-            if (fcc == D3DFMT_DXT1) {
-                return DxgiFormat.BC1_UNORM;
-            } else if (fcc == D3DFMT_DXT2 || fcc == D3DFMT_DXT3) {
-                return DxgiFormat.BC2_UNORM;
-            } else if (fcc == D3DFMT_DXT4 || fcc == D3DFMT_DXT5) {
-                return DxgiFormat.BC3_UNORM;
-            } else if (fcc == DXGI_FORMAT_BC4_UNORM || fcc == DXGI_FORMAT_BC4_UNORM_ALT) {
-                return DxgiFormat.BC4_UNORM;
-            } else if (fcc == DXGI_FORMAT_BC4_SNORM) {
-                return DxgiFormat.BC4_SNORM;
-            } else if (fcc == DXGI_FORMAT_BC5_UNORM) {
-                return DxgiFormat.BC5_UNORM;
-            } else if (fcc == DXGI_FORMAT_BC5_SNORM) {
-                return DxgiFormat.BC5_SNORM;
-            } else if (fcc == D3DFMT_R8G8_B8G8) {
-                return DxgiFormat.R8G8_B8G8_UNORM;
-            } else if (fcc == D3DFMT_G8R8_G8B8) {
-                return DxgiFormat.G8R8_G8B8_UNORM;
-            } else if (fcc == D3dFormat.A16B16G16R16.value()) {
-                return DxgiFormat.R16G16B16A16_UNORM;
-            } else if (fcc == D3dFormat.Q16W16V16U16.value()) {
-                return DxgiFormat.R16G16B16A16_SNORM;
-            } else if (fcc == D3dFormat.R16F.value()) {
-                return DxgiFormat.R16_FLOAT;
-            } else if (fcc == D3dFormat.G16R16F.value()) {
-                return DxgiFormat.R16G16_FLOAT;
-            } else if (fcc == D3dFormat.A16B16G16R16F.value()) {
-                return DxgiFormat.R16G16B16A16_FLOAT;
-            } else if (fcc == D3dFormat.R32F.value()) {
-                return DxgiFormat.R32_FLOAT;
-            } else if (fcc == D3dFormat.A32B32G32R32F.value()) {
-                return DxgiFormat.R32G32B32A32_FLOAT;
-            }
-        }
-        // TODO: more derivations
-        return DxgiFormat.UNKNOWN;
-    }
-
     private static boolean isBlockCompressed(DdsPixelformat pf) {
-        if ((pf.dwFlags() & DdsConstants.DDPF_FOURCC) == DdsConstants.DDPF_FOURCC) {
+        if ((pf.dwFlags() & DDPF_FOURCC) == DDPF_FOURCC) {
             int fcc = pf.dwFourCC();
             return fcc == D3DFMT_DXT1 || fcc == D3DFMT_DXT2 || fcc == D3DFMT_DXT3 || fcc == D3DFMT_DXT4 || fcc == D3DFMT_DXT5
                     || fcc == DXGI_FORMAT_BC4_UNORM || fcc == DXGI_FORMAT_BC4_UNORM_ALT || fcc == DXGI_FORMAT_BC4_SNORM
@@ -297,5 +268,33 @@ public final class Util {
                 cm,
                 cm.createCompatibleSampleModel(1, 1)
         );
+    }
+
+    public static int ceilDivUnsigned(int dividend, int divisor) {
+        if (dividend == 0) {
+            return 0;
+        } else if (divisor == 1) {
+            return dividend;
+        }
+
+        return 1 + Integer.divideUnsigned(dividend - 1, divisor);
+    }
+
+    public static int read24(ByteBuffer b) {
+        return b.order() == ByteOrder.BIG_ENDIAN ? read24BE(b) : read24LE(b);
+    }
+
+    public static int read24BE(ByteBuffer b) {
+        int b0 = Byte.toUnsignedInt(b.get());
+        int b1 = Byte.toUnsignedInt(b.get());
+        int b2 = Byte.toUnsignedInt(b.get());
+        return (b0 << 16) | (b1 << 8) | b2;
+    }
+
+    public static int read24LE(ByteBuffer b) {
+        int b0 = Byte.toUnsignedInt(b.get());
+        int b1 = Byte.toUnsignedInt(b.get());
+        int b2 = Byte.toUnsignedInt(b.get());
+        return b0 | (b1 << 8) | (b2 << 16);
     }
 }

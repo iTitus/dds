@@ -1,0 +1,66 @@
+package io.github.ititus.dds.internal;
+
+import io.github.ititus.dds.DdsConstants;
+import io.github.ititus.dds.PixelFormat;
+
+public final class Util {
+
+    private Util() {
+    }
+
+    public static int calculatePitch(int width, PixelFormat format) {
+        int horizontalBlocks = maxUnsigned(1, ceilDivUnsigned(width, format.getHorizontalPixelsPerBlock()));
+        int bitsPerBlock = format.getBitsPerBlock();
+        if (bitsPerBlock % 8 == 0) {
+            int bytesPerBlock = bitsPerBlock / 8;
+            return horizontalBlocks * bytesPerBlock;
+        }
+
+        int bits = Math.multiplyExact(horizontalBlocks, format.getBitsPerBlock());
+        return ceilDivUnsigned(bits, 8);
+    }
+
+    public static int calculateSurfaceSize(int height, int width, PixelFormat format) {
+        int pitch = calculatePitch(width, format);
+        int verticalBlocks = maxUnsigned(1, ceilDivUnsigned(height, format.getVerticalPixelsPerBlock()));
+        return Math.multiplyExact(pitch, verticalBlocks);
+    }
+
+    public static int maxUnsigned(int a, int b) {
+        if (Integer.compareUnsigned(a, b) < 0) {
+            return b;
+        } else {
+            return a;
+        }
+    }
+
+    public static int ceilDivUnsigned(int dividend, int divisor) {
+        if (dividend == 0) {
+            return 0;
+        } else if (divisor == 1) {
+            return dividend;
+        }
+
+        return 1 + Integer.divideUnsigned(dividend - 1, divisor);
+    }
+
+    private static boolean isPrintable(String s) {
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (Character.isISOControl(c)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static String guessToString(int n) {
+        String fourCC = DdsConstants.getStringFrom4CC(n);
+        if (isPrintable(fourCC)) {
+            return fourCC;
+        }
+
+        return Integer.toUnsignedString(n);
+    }
+}

@@ -2,6 +2,9 @@ package io.github.ititus.dds;
 
 public sealed interface PixelFormat permits D3dFormat, DxgiFormat {
 
+    /**
+     * bpp
+     */
     int getBitsPerPixel();
 
     /**

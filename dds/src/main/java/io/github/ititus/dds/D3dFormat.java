@@ -1,5 +1,5 @@
 /*
-This file was ported from a C++ implementation given by Microsoft in DirectXTK and their documentation.
+This file was ported from a C++ implementation given by Microsoft in DirectXTK/DirectXTex and their documentation.
 
 MIT License
 

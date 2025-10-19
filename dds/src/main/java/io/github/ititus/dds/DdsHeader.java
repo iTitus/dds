@@ -1,8 +1,8 @@
 package io.github.ititus.dds;
 
+import io.github.ititus.dds.internal.Util;
+
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.StringJoiner;
 
 import static io.github.ititus.dds.DdsConstants.*;
@@ -126,10 +126,10 @@ public record DdsHeader(
     }
 
     public D3dFormat d3dFormat() {
-        return ddspf.d3dFormat();
+        return ddspf.deriveD3dFormat();
     }
 
-    public int calculateCubemapFaces() {
+    public int countCubemapFaces() {
         int faces = 0;
         if ((dwCaps2 & DDSCAPS2_CUBEMAP_POSITIVEX) == DDSCAPS2_CUBEMAP_POSITIVEX) {
             faces++;
@@ -201,37 +201,37 @@ public record DdsHeader(
             j.add("dwMipMapCount=" + Integer.toUnsignedString(dwMipMapCount));
         }
         if (dwReserved1_0 != 0) {
-            j.add("dwReserved[0]=" + DdsHelper.guessToString(dwReserved1_0));
+            j.add("dwReserved[0]=" + Util.guessToString(dwReserved1_0));
         }
         if (dwReserved1_1 != 0) {
-            j.add("dwReserved[1]=" + DdsHelper.guessToString(dwReserved1_1));
+            j.add("dwReserved[1]=" + Util.guessToString(dwReserved1_1));
         }
         if (dwReserved1_2 != 0) {
-            j.add("dwReserved[2]=" + DdsHelper.guessToString(dwReserved1_2));
+            j.add("dwReserved[2]=" + Util.guessToString(dwReserved1_2));
         }
         if (dwReserved1_3 != 0) {
-            j.add("dwReserved[3]=" + DdsHelper.guessToString(dwReserved1_3));
+            j.add("dwReserved[3]=" + Util.guessToString(dwReserved1_3));
         }
         if (dwReserved1_4 != 0) {
-            j.add("dwReserved[4]=" + DdsHelper.guessToString(dwReserved1_4));
+            j.add("dwReserved[4]=" + Util.guessToString(dwReserved1_4));
         }
         if (dwReserved1_5 != 0) {
-            j.add("dwReserved[5]=" + DdsHelper.guessToString(dwReserved1_5));
+            j.add("dwReserved[5]=" + Util.guessToString(dwReserved1_5));
         }
         if (dwReserved1_6 != 0) {
-            j.add("dwReserved[6]=" + DdsHelper.guessToString(dwReserved1_6));
+            j.add("dwReserved[6]=" + Util.guessToString(dwReserved1_6));
         }
         if (dwReserved1_7 != 0) {
-            j.add("dwReserved[7]=" + DdsHelper.guessToString(dwReserved1_7));
+            j.add("dwReserved[7]=" + Util.guessToString(dwReserved1_7));
         }
         if (dwReserved1_8 != 0) {
-            j.add("dwReserved[8]=" + DdsHelper.guessToString(dwReserved1_8));
+            j.add("dwReserved[8]=" + Util.guessToString(dwReserved1_8));
         }
         if (dwReserved1_9 != 0) {
-            j.add("dwReserved[9]=" + DdsHelper.guessToString(dwReserved1_9));
+            j.add("dwReserved[9]=" + Util.guessToString(dwReserved1_9));
         }
         if (dwReserved1_10 != 0) {
-            j.add("dwReserved[10]=" + DdsHelper.guessToString(dwReserved1_10));
+            j.add("dwReserved[10]=" + Util.guessToString(dwReserved1_10));
         }
         if (dwCaps != 0) {
             StringJoiner j2 = new StringJoiner(",", "dwCaps=[", "]");
@@ -287,7 +287,7 @@ public record DdsHeader(
             j.add("dwCaps4=0x" + Integer.toHexString(dwCaps4));
         }
         if (dwReserved2 != 0) {
-            j.add("dwReserved2=" + DdsHelper.guessToString(dwReserved2));
+            j.add("dwReserved2=" + Util.guessToString(dwReserved2));
         }
         j.add("ddspf=" + ddspf);
         return j.toString();

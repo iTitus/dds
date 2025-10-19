@@ -1,6 +1,8 @@
 package io.github.ititus.ddsiio;
 
-import io.github.ititus.dds.*;
+import io.github.ititus.dds.DdsFile;
+import io.github.ititus.dds.DdsResource;
+import io.github.ititus.dds.PixelFormat;
 import io.github.ititus.ddsiio.internal.BC;
 import io.github.ititus.ddsiio.internal.Util;
 
@@ -92,19 +94,7 @@ public class DdsImageReader extends ImageReader {
         WritableRaster raster = img.getRaster();
 
         try {
-            PixelFormat format;
-            if (dds.isDxt10()) {
-                format = dds.dxgiFormat();
-            } else {
-                // override format
-                DxgiFormat dxgiFormat = Util.deriveDxgiFormat(dds.header());
-                if (dxgiFormat != DxgiFormat.UNKNOWN) {
-                    format = dxgiFormat;
-                } else {
-                    format = dds.d3dFormat();
-                }
-            }
-
+            PixelFormat format = dds.derivePixelFormat();
             if (format.isYUVFormat()) {
                 throw new UnsupportedOperationException("unsupported YUV format " + format);
             } else if (format.isPacked()) {
@@ -117,7 +107,7 @@ public class DdsImageReader extends ImageReader {
                 switch (bpp) {
                     case 1, 2, 4, 8 -> {
                         int pixelsPerByte = 8 / bpp;
-                        byte[] arr = new byte[DdsHelper.ceilDivUnsigned(w, pixelsPerByte)];
+                        byte[] arr = new byte[Util.ceilDivUnsigned(w, pixelsPerByte)];
                         for (int y = 0; Integer.compareUnsigned(y, h) < 0; y++) {
                             b.get(arr);
                             raster.setDataElements(0, y, w, 1, arr);

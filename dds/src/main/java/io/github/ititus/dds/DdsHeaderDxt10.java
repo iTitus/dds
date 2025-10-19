@@ -35,13 +35,13 @@ public record DdsHeaderDxt10(
         }
 
         switch (resourceDimension) {
-            case D3D10_RESOURCE_DIMENSION_TEXTURE1D -> {
+            case TEXTURE1D -> {
                 if ((header.dwFlags() & DdsConstants.DDSD_HEIGHT) != DdsConstants.DDSD_HEIGHT || header.dwHeight() != 1) {
                     return false;
                 }
             }
-            case D3D10_RESOURCE_DIMENSION_TEXTURE2D -> {}
-            case D3D10_RESOURCE_DIMENSION_TEXTURE3D -> {
+            case TEXTURE2D -> {}
+            case TEXTURE3D -> {
                 if ((header.dwFlags() & DdsConstants.DDSD_DEPTH) != DdsConstants.DDSD_DEPTH) {
                     return false;
                 } else if (arraySize != 1) {
@@ -57,7 +57,7 @@ public record DdsHeaderDxt10(
     }
 
     public boolean isAlphaPremultiplied() {
-        return (miscFlags2 & DDS_ALPHA_MODE_PREMULTIPLIED) == DDS_ALPHA_MODE_PREMULTIPLIED;
+        return (miscFlags2 & DDS_MISC_FLAGS2_ALPHA_MODE_MASK) == DDS_ALPHA_MODE_PREMULTIPLIED;
     }
 
     @Override
@@ -66,7 +66,7 @@ public record DdsHeaderDxt10(
         if (dxgiFormat != DxgiFormat.UNKNOWN) {
             j.add("dxgiFormat=" + dxgiFormat);
         }
-        if (resourceDimension != D3d10ResourceDimension.D3D10_RESOURCE_DIMENSION_UNKNOWN) {
+        if (resourceDimension != D3d10ResourceDimension.UNKNOWN) {
             j.add("resourceDimension=" + resourceDimension);
         }
         if (miscFlag != 0) {

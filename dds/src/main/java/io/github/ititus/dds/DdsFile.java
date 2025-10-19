@@ -139,16 +139,12 @@ public record DdsFile(
         return header10 != null;
     }
 
-    public D3dFormat d3dFormat() {
-        return header.d3dFormat();
-    }
-
-    public DxgiFormat dxgiFormat() {
-        return header10 != null ? header10.dxgiFormat() : DxgiFormat.UNKNOWN;
-    }
-
     public int resourceCount() {
         return resources.size();
+    }
+
+    public PixelFormat derivePixelFormat() {
+        return DdsHelper.derivePixelFormat(this);
     }
 
     @Override
@@ -156,6 +152,7 @@ public record DdsFile(
         return "DdsFile[" +
                 "header=" + header +
                 (header10 == null ? "" : ", header10=" + header10) +
+                ", resourceCount=" + this.resourceCount() +
                 ']';
     }
 }

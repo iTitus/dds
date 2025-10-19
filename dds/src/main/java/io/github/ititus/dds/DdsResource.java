@@ -1,10 +1,13 @@
 package io.github.ititus.dds;
 
+import io.github.ititus.dds.internal.Util;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 public final class DdsResource {
 
@@ -29,13 +32,13 @@ public final class DdsResource {
     public static List<DdsResource> loadAll(DataReader r, DdsHeader header, DdsHeaderDxt10 header10) throws IOException {
         List<DdsResource> resources = new ArrayList<>();
 
-        int height = DdsHelper.maxUnsigned(1, header.dwHeight());
-        int width = DdsHelper.maxUnsigned(1, header.dwWidth());
-        int depth = header.isVolumeTexture() ? DdsHelper.maxUnsigned(1, header.dwDepth()) : 1;
-        int mipMapCount = header.hasMipmaps() ? DdsHelper.maxUnsigned(1, header.dwMipMapCount()) : 1;
-        int faces = header.isCubemap() ? DdsHelper.maxUnsigned(1, header.calculateCubemapFaces()) : 1;
-        int arraySize = header10 != null ? DdsHelper.maxUnsigned(1, header10.arraySize()) : 1;
-        PixelFormat format = header10 != null ? header10.dxgiFormat() : header.d3dFormat();
+        int height = Util.maxUnsigned(1, header.dwHeight());
+        int width = Util.maxUnsigned(1, header.dwWidth());
+        int depth = header.isVolumeTexture() ? Util.maxUnsigned(1, header.dwDepth()) : 1;
+        int mipMapCount = header.hasMipmaps() ? Util.maxUnsigned(1, header.dwMipMapCount()) : 1;
+        int faces = header.isCubemap() ? Util.maxUnsigned(1, header.countCubemapFaces()) : 1;
+        int arraySize = header10 != null ? Util.maxUnsigned(1, header10.arraySize()) : 1;
+        PixelFormat format = DdsHelper.derivePixelFormat(header, header10);
 
         for (int arrayIndex = 0; Integer.compareUnsigned(arrayIndex, arraySize) < 0; arrayIndex++) {
             for (int face = 0; Integer.compareUnsigned(face, faces) < 0; face++) {
@@ -43,7 +46,7 @@ public final class DdsResource {
                 int currentWidth = width;
                 int currentDepth = depth;
                 for (int mipmap = 0; Integer.compareUnsigned(mipmap, mipMapCount) < 0; mipmap++) {
-                    int size = DdsHelper.calculateSurfaceSize(currentHeight, currentWidth, format);
+                    int size = Util.calculateSurfaceSize(currentHeight, currentWidth, format);
                     for (int z = 0; Integer.compareUnsigned(z, currentDepth) < 0; z++) {
                         /*System.out.printf(
                                 "loading resource: index=%d/%d, face=%d/%d, mipmap=%d/%d, z=%d/%d | height=%d, " +
@@ -112,13 +115,13 @@ public final class DdsResource {
 
     @Override
     public String toString() {
-        List<String> list = new ArrayList<>(6);
-        list.add("height=" + Integer.toUnsignedString(height));
-        list.add("width=" + Integer.toUnsignedString(width));
-        list.add("arrayIndex=" + Integer.toUnsignedString(arrayIndex));
-        list.add("faceIndex=" + Integer.toUnsignedString(faceIndex));
-        list.add("mipmapLevel=" + Integer.toUnsignedString(mipmapLevel));
-        list.add("zLevel=" + Integer.toUnsignedString(zLevel));
-        return "DdsResource[" + String.join(", ", list) + ']';
+        StringJoiner j = new StringJoiner(", ", this.getClass().getSimpleName() + "[", "]");
+        j.add("height=" + Integer.toUnsignedString(height));
+        j.add("width=" + Integer.toUnsignedString(width));
+        j.add("arrayIndex=" + Integer.toUnsignedString(arrayIndex));
+        j.add("faceIndex=" + Integer.toUnsignedString(faceIndex));
+        j.add("mipmapLevel=" + Integer.toUnsignedString(mipmapLevel));
+        j.add("zLevel=" + Integer.toUnsignedString(zLevel));
+        return j.toString();
     }
 }
