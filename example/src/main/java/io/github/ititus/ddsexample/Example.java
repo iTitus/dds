@@ -201,7 +201,7 @@ public final class Example {
 
             reader.setInput(iis);
             int numImages = reader.getNumImages(false);
-            if (numImages == 0) {
+            if (numImages <= 0) {
                 return;
             }
 
