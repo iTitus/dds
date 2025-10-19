@@ -203,8 +203,6 @@ public final class Util {
             case BC1_UNORM, BC1_UNORM_SRGB,
                  BC2_UNORM, BC2_UNORM_SRGB,
                  BC3_UNORM, BC3_UNORM_SRGB,
-                 BC4_UNORM,
-                 BC5_UNORM,
                  BC7_UNORM, BC7_UNORM_SRGB -> packedRGB(
                     format.isSRGB(),
                     32,
