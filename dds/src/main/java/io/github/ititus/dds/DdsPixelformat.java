@@ -100,10 +100,6 @@ public record DdsPixelformat(
         if (dwABitMask != 0) {
             j.add("dwABitMask=0x" + Integer.toHexString(dwABitMask));
         }
-        var d3dFormat = this.deriveD3dFormat();
-        if (d3dFormat != D3dFormat.UNKNOWN) {
-            j.add("d3dFormat=" + d3dFormat);
-        }
         return j.toString();
     }
 }

@@ -149,9 +149,11 @@ public record DdsFile(
 
     @Override
     public String toString() {
+        PixelFormat pf = this.derivePixelFormat();
         return "DdsFile[" +
                 "header=" + header +
                 (header10 == null ? "" : ", header10=" + header10) +
+                ", pixelFormat=" + pf.getClass().getSimpleName() + "." + pf +
                 ", resourceCount=" + this.resourceCount() +
                 ']';
     }
