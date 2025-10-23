@@ -121,6 +121,15 @@ public class DdsImageReader extends ImageReader {
                             raster.setDataElements(0, y, w, 1, arr);
                         }
                     }
+                    case 24 -> {
+                        int[] arr = new int[w];
+                        for (int y = 0; Integer.compareUnsigned(y, h) < 0; y++) {
+                            for (int x = 0; x < w; x++) {
+                                arr[x] = Util.read24(b);
+                            }
+                            raster.setDataElements(0, y, w, 1, arr);
+                        }
+                    }
                     case 32 -> {
                         int[] arr = new int[w];
                         IntBuffer ib = b.asIntBuffer();

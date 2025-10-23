@@ -241,15 +241,15 @@ public final class Util {
         return false;
     }
 
-    private static int findExactIntegerTransferType(int bpp) {
-        if (bpp == 8) {
+    private static int findBestIntegerTransferType(int bpp) {
+        if (bpp <= 8) {
             return DataBuffer.TYPE_BYTE;
-        } else if (bpp == 16) {
+        } else if (bpp <= 16) {
             return DataBuffer.TYPE_USHORT;
-        } else if (bpp == 32) {
+        } else if (bpp <= 32) {
             return DataBuffer.TYPE_INT;
         } else {
-            throw new UnsupportedOperationException("cannot find exact transfer type for bpp " + bpp);
+            throw new UnsupportedOperationException("cannot find transfer type for bpp " + bpp);
         }
     }
 
@@ -262,7 +262,7 @@ public final class Util {
                 bmask,
                 amask,
                 isAlphaPremultiplied,
-                findExactIntegerTransferType(bpp)
+                findBestIntegerTransferType(bpp)
         );
         return new ImageTypeSpecifier(
                 cm,
