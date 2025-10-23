@@ -29,8 +29,10 @@ public final class BC {
                 if (xMax == 4) {
                     raster.setDataElements(x, y, xMax, yMax, decoded);
                 } else {
+                    int[] pixels = new int[xMax];
                     for (int i = 0; i < yMax; i++) {
-                        raster.setDataElements(x, y, xMax, yMax, Arrays.copyOfRange(decoded, 4 * i, 4 * i + xMax));
+                        System.arraycopy(decoded, 4 * i, pixels, 0, xMax);
+                        raster.setDataElements(x, y, xMax, 1, pixels);
                     }
                 }
             }
