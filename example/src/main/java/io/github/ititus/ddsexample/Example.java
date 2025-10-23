@@ -1,6 +1,7 @@
 package io.github.ititus.ddsexample;
 
 import io.github.ititus.dds.DdsFile;
+import io.github.ititus.valve_tools.steam_api.SteamInstallation;
 
 import javax.imageio.ImageIO;
 import java.io.IOException;
@@ -24,27 +25,28 @@ public final class Example {
 
     public static void main(String[] args) throws Exception {
         var desktop = Path.of(System.getProperty("user.home"), "Desktop").toRealPath();
-        /*var out = desktop.resolve("pdx");
-        var steam = Path.of("C:/Program Files (x86)/Steam/steamapps/common").toRealPath();
-        var ck3InstallDir = steam.resolve("Crusader Kings III");
-        var eu4InstallDir = steam.resolve("Europa Universalis IV");
-        var vic3InstallDir = steam.resolve("Victoria III");
-        var hoi4InstallDir = steam.resolve("Hearts of Iron IV");
-        var stellarisInstallDir = steam.resolve("Stellaris");*/
+
+        // showInfoRecursive(desktop.resolve("in"));
+        // convertRecursive(desktop.resolve("in"), desktop.resolve("out"), "png", false);
+
+        var out = desktop.resolve("pdx");
+        var steamInstallation = SteamInstallation.find();
+        var stellarisInstallDir = steamInstallation.getInstallationDir(281990).orElseThrow().toRealPath();
+        /*var ck3InstallDir = steamInstallation.getInstallationDir(1158310).orElseThrow().toRealPath();
+        var eu4InstallDir = steamInstallation.getInstallationDir(236850).orElseThrow().toRealPath();
+        var vic3InstallDir = steamInstallation.getInstallationDir(529340).orElseThrow().toRealPath();
+        var hoi4InstallDir = steamInstallation.getInstallationDir(394360).orElseThrow().toRealPath();*/
 
         // showInfoAndConvertToPng(desktop.resolve("ce_frame_circle.dds"), false);
         // showInfoAndConvertToPng(desktop.resolve("ce_dragon_bhutan.dds"), false);
         // showInfoAndConvertToPng(desktop.resolve("surround_tile.dds"), false);
         // showInfoAndConvertToPng(desktop.resolve("placeholder_activity_background_bg.dds"), false);
         // showInfoAndConvertToPng(desktop.resolve("colony_settlement.dds"), false);
-        // convertRecursive(stellarisInstallDir, out.resolve("dds_out"), "png", false);
+        convertRecursive(stellarisInstallDir.resolve("gfx/loadingscreens"), out.resolve("dds_out"), "png", false);
 
         // showInfoRecursive(ck3InstallDir, out.resolve("dds_ck3.log"));
         // showInfoRecursive(eu4InstallDir, out.resolve("dds_eu4.log"));
         // showInfoRecursive(stellarisInstallDir, out.resolve("dds_stellaris.log"));
-
-        showInfoRecursive(desktop.resolve("in"));
-        convertRecursive(desktop.resolve("in"), desktop.resolve("out"), "png", false);
     }
 
     static void showInfoAndConvertToPng(Path file, boolean all) throws Exception {
