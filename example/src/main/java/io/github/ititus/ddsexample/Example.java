@@ -1,7 +1,6 @@
 package io.github.ititus.ddsexample;
 
 import io.github.ititus.dds.DdsFile;
-import io.github.ititus.valve_tools.steam_api.SteamInstallation;
 
 import javax.imageio.ImageIO;
 import java.io.IOException;
@@ -18,35 +17,35 @@ import java.util.stream.Stream;
 public final class Example {
 
     static final Predicate<Path> DDS_FILE =
-            file -> Files.isRegularFile(file)
-                    && file.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".dds");
+            file -> file.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".dds")
+                    && Files.isRegularFile(file);
 
     private Example() {}
 
     public static void main(String[] args) throws Exception {
         var desktop = Path.of(System.getProperty("user.home"), "Desktop").toRealPath();
 
-        // showInfoRecursive(desktop.resolve("in"));
+        showInfoRecursive(desktop.resolve("in"));
         // convertRecursive(desktop.resolve("in"), desktop.resolve("out"), "png", false);
 
-        var out = desktop.resolve("pdx");
-        var steamInstallation = SteamInstallation.find();
-        var stellarisInstallDir = steamInstallation.getInstallationDir(281990).orElseThrow().toRealPath();
-        /*var ck3InstallDir = steamInstallation.getInstallationDir(1158310).orElseThrow().toRealPath();
-        var eu4InstallDir = steamInstallation.getInstallationDir(236850).orElseThrow().toRealPath();
-        var vic3InstallDir = steamInstallation.getInstallationDir(529340).orElseThrow().toRealPath();
-        var hoi4InstallDir = steamInstallation.getInstallationDir(394360).orElseThrow().toRealPath();*/
+        // var steamInstallation = SteamInstallation.find();
+        // var eu5InstallDir = steamInstallation.getInstallationDir(3450310).orElseThrow().toRealPath();
+        // var vic3InstallDir = steamInstallation.getInstallationDir(529340).orElseThrow().toRealPath();
+        // var ck3InstallDir = steamInstallation.getInstallationDir(1158310).orElseThrow().toRealPath();
+        // var hoi4InstallDir = steamInstallation.getInstallationDir(394360).orElseThrow().toRealPath();
+        // var stellarisInstallDir = steamInstallation.getInstallationDir(281990).orElseThrow().toRealPath();
+        // var eu4InstallDir = steamInstallation.getInstallationDir(236850).orElseThrow().toRealPath();
 
-        // showInfoAndConvertToPng(desktop.resolve("ce_frame_circle.dds"), false);
-        // showInfoAndConvertToPng(desktop.resolve("ce_dragon_bhutan.dds"), false);
-        // showInfoAndConvertToPng(desktop.resolve("surround_tile.dds"), false);
-        // showInfoAndConvertToPng(desktop.resolve("placeholder_activity_background_bg.dds"), false);
-        // showInfoAndConvertToPng(desktop.resolve("colony_settlement.dds"), false);
-        convertRecursive(stellarisInstallDir.resolve("gfx/loadingscreens"), out.resolve("dds_out"), "png", false);
+        // var out = desktop.resolve("pdx");
 
-        // showInfoRecursive(ck3InstallDir, out.resolve("dds_ck3.log"));
-        // showInfoRecursive(eu4InstallDir, out.resolve("dds_eu4.log"));
-        // showInfoRecursive(stellarisInstallDir, out.resolve("dds_stellaris.log"));
+        // showInfoRecursive(stellarisInstallDir, out.resolve("stellaris.log"));
+
+        // convertRecursive(eu5InstallDir, out.resolve("eu5"), "png", false);
+        // convertRecursive(vic3InstallDir, out.resolve("vic3"), "png", false);
+        // convertRecursive(ck3InstallDir, out.resolve("ck3"), "png", false);
+        // convertRecursive(hoi4InstallDir, out.resolve("hoi4"), "png", false);
+        // convertRecursive(stellarisInstallDir, out.resolve("stellaris"), "png", false);
+        // convertRecursive(eu4InstallDir, out.resolve("eu4"), "png", false);
     }
 
     static void showInfoAndConvertToPng(Path file, boolean all) throws Exception {
@@ -114,20 +113,28 @@ public final class Example {
             try {
                 convertTo(file, outParentDir, formatName, all);
             } catch (Exception e) {
-                String msg;
+                StringBuilder msg = new StringBuilder(relative.toString().replace('\\', '/')).append(": ");
+                Exception toPrint;
                 try {
                     var dds = DdsFile.load(file);
-                    msg = "conversion error: " + dds + " | " + e + " | cause=" + e.getCause();
+                    toPrint = e;
+                    msg.append("conversion error: ").append(dds);
                 } catch (Exception e2) {
                     e2.addSuppressed(e);
-                    msg = "load error | " + e2 + " | cause=" + e2.getCause();
+                    toPrint = e2;
+                    msg.append("load error");
                 }
 
-                System.out.println(relative.toString().replace('\\', '/') + ": " + msg);
+                msg.append(" | ").append(toPrint);
+                for (Throwable cause = toPrint.getCause(); cause != null; cause = cause.getCause()) {
+                    msg.append(" | cause=").append(cause);
+                }
+
+                System.out.println(msg);
             }
         });
         long elapsed = System.nanoTime() - now;
-        System.out.printf("conversion done after %.0f ms%n",  elapsed / 1e6);
+        System.out.printf("conversion done after %.0f ms%n", elapsed / 1e6);
     }
 
     static void convertTo(Path in, Path outDir, String formatName, boolean all) throws IOException {
