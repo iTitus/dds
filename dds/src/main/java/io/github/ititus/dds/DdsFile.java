@@ -1,5 +1,7 @@
 package io.github.ititus.dds;
 
+import io.github.ititus.dds.exception.DdsLoadException;
+
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
@@ -14,13 +16,15 @@ public record DdsFile(
         List<DdsResource> resources
 ) {
 
-    public static DdsFile load(Path path) throws IOException {
+    public static DdsFile load(Path path) throws DdsLoadException {
         try (InputStream is = new BufferedInputStream(Files.newInputStream(path))) {
             return load(is);
+        } catch (Exception e) {
+            throw new DdsLoadException("could not load dds file " + path, e);
         }
     }
 
-    public static DdsFile load(InputStream is) throws IOException {
+    public static DdsFile load(InputStream is) throws DdsLoadException {
         return load(new DataReader() {
             @Override
             public byte readByte() throws IOException {
@@ -52,7 +56,7 @@ public record DdsFile(
         });
     }
 
-    public static DdsFile load(DataInput di) throws IOException {
+    public static DdsFile load(DataInput di) throws DdsLoadException {
         return load(new DataReader() {
             @Override
             public byte readByte() throws IOException {
@@ -73,39 +77,55 @@ public record DdsFile(
         });
     }
 
-    public static DdsFile load(DataReader r) throws IOException {
+    public static DdsFile load(DataReader r) throws DdsLoadException {
         int dwMagic;
         try {
             dwMagic = r.readDword();
         } catch (EOFException e) {
-            throw new IOException("empty file", e);
+            throw new DdsLoadException("empty dds file", e);
+        } catch (Exception e) {
+            throw new DdsLoadException("could not read magic bytes", e);
         }
 
         if (dwMagic != DDS_MAGIC) {
-            throw new IOException("invalid dds magic");
+            throw new DdsLoadException("invalid dds magic");
         }
 
-        DdsHeader header = DdsHeader.load(r);
+        DdsHeader header;
+        try {
+            header = DdsHeader.load(r);
+        } catch (Exception e) {
+            throw new DdsLoadException("could not load dds header", e);
+        }
         if (!header.isValid()) {
-            throw new IOException("invalid dds header");
+            throw new DdsLoadException("invalid dds header");
         }
 
         DdsHeaderDxt10 header10;
         if (header.shouldLoadHeader10()) {
-            header10 = DdsHeaderDxt10.load(r);
+            try {
+                header10 = DdsHeaderDxt10.load(r);
+            } catch (Exception e) {
+                throw new DdsLoadException("could not load dds dxt10 header", e);
+            }
             if (!header10.isValid(header)) {
-                throw new IOException("invalid dds dxt10 header");
+                throw new DdsLoadException("invalid dds dxt10 header");
             }
         } else {
             header10 = null;
         }
 
-        List<DdsResource> resources = DdsResource.loadAll(r, header, header10);
+        List<DdsResource> resources;
+        try {
+            resources = DdsResource.loadAll(r, header, header10);
+        } catch (Exception e) {
+            throw new DdsLoadException("could not load dds dxt10 header", e);
+        }
 
         try {
             r.readByte();
-            throw new IOException("unconsumed bytes");
-        } catch (EOFException ignored) {
+            throw new DdsLoadException("unconsumed bytes");
+        } catch (Exception ignored) {
         }
 
         return new DdsFile(header, header10, resources);
