@@ -38,6 +38,7 @@ public final class Example {
 
         // var out = desktop.resolve("pdx");
 
+        // showInfoRecursive(vic3InstallDir, out.resolve("vic3.log"));
         // showInfoRecursive(stellarisInstallDir, out.resolve("stellaris.log"));
 
         // convertRecursive(eu5InstallDir, out.resolve("eu5"), "png", false);
@@ -56,7 +57,6 @@ public final class Example {
     private static void doRecursive(Path inDir, Consumer<? super Path> action) throws Exception {
         try (Stream<Path> stream = Files.walk(inDir)) {
             stream
-                    .filter(Files::isRegularFile)
                     .filter(DDS_FILE)
                     .forEach(action);
         }
